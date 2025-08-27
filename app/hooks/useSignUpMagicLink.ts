@@ -1,14 +1,14 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useActionState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { signUpNewStudentAction } from "@/app/new-user/student/action";
 import { signUpNewAdminAction } from "@/app/new-user/admin/action";
+import toast from "react-hot-toast";
 
-export const useSignUpMagicLink = () => {
-  const router = useRouter();
+export const useSignUpMagicLink = (resetForm: () => void) => {
   const { signUpWithMagicLink } = useAuth();
   const [showSuccess, setShowSuccess] = useState(false);
   const pathname = usePathname();
@@ -53,10 +53,13 @@ export const useSignUpMagicLink = () => {
 
   useEffect(() => {
     if (showSuccess) {
-      document.cookie = "fromAuth=true; path=/; max-age=60; samesite=lax";
-      router.replace("/check-email");
+      toast.success("User created successfully!", {
+        duration: 5000,
+      });
+      resetForm();
+      setShowSuccess(false);
     }
-  }, [showSuccess, router]);
+  }, [showSuccess, resetForm]);
 
   return { error, submitAction, isPending };
 };

@@ -79,6 +79,7 @@ export interface StudentData {
 export interface GroupData {
   group_name?: string;
   id?: string;
+  closed?: boolean;
   error?: string;
 }
 

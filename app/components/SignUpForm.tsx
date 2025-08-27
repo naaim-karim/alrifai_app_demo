@@ -38,13 +38,6 @@ const SignUpForm = () => {
 
     loadFormConfig();
   }, [pathname]);
-
-  const { error, submitAction, isPending } = useSignUpMagicLink();
-  useEffect(() => {
-    if (error) {
-      setServerError(error.message);
-    }
-  }, [error]);
   const {
     values,
     errors,
@@ -54,7 +47,13 @@ const SignUpForm = () => {
     validateAllFields,
     clearErrors,
     resetForm,
-  } = useFormFields(signUpFormConfig);
+  } = useFormFields(signUpFormConfig, setServerError);
+  const { error, submitAction, isPending } = useSignUpMagicLink(resetForm);
+  useEffect(() => {
+    if (error) {
+      setServerError(error.message);
+    }
+  }, [error]);
 
   const handleSubmit = async (formData: FormData) => {
     clearErrors();
@@ -82,7 +81,7 @@ const SignUpForm = () => {
   return (
     <main className="main-container flex-grow-1 py-16">
       <h1 className="text-xl text-center mb-8 font-bold md:text-3xl">
-        Sign Up New User
+        Sign Up New {pathname.includes("admin") ? "Admin/Teacher" : "Student"}
       </h1>
       <Form
         action={handleSubmit}

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Loading from "./Loading";
 import { useEffect } from "react";
 import supabase from "@/lib/supabaseClient";
+import toast from "react-hot-toast";
 
 const HomePage = () => {
   const { user, loading } = useAuth();
@@ -23,7 +24,9 @@ const HomePage = () => {
         });
 
         if (error) {
-          console.error("Demo auto-sign in failed:", error);
+          toast.error("Demo auto-sign in failed", {
+            duration: 5000,
+          });
         }
       }
     };

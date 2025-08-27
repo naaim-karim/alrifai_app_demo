@@ -1,7 +1,10 @@
 import { FormField, FormValue, FormValues } from "@/types";
 import { createRef, useMemo, useState, useCallback, useEffect } from "react";
 
-export const useFormFields = (fields: FormField[]) => {
+export const useFormFields = (
+  fields: FormField[],
+  setServerError: (error: string | null) => void
+) => {
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const getInitialFormValues = useCallback((): FormValues => {
     const initialValues: FormValues = {};
@@ -34,12 +37,14 @@ export const useFormFields = (fields: FormField[]) => {
     return initialValues;
   }, [fields]);
 
-  const [values, setValues] = useState<FormValues>(getInitialFormValues);
+  const [values, setValues] = useState<FormValues>(() =>
+    getInitialFormValues()
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (fields.length > 0 && Object.keys(values).length === 0) {
-      setValues(getInitialFormValues);
+      setValues(() => getInitialFormValues());
     } else if (fields.length > 0 && Object.keys(values).length > 0) {
       setInitialLoadComplete(true);
     }
@@ -191,9 +196,10 @@ export const useFormFields = (fields: FormField[]) => {
 
   const resetForm = useCallback(() => {
     localStorage.removeItem("formValues");
-    setValues(getInitialFormValues);
+    setValues(() => getInitialFormValues());
     clearErrors();
-  }, [getInitialFormValues, clearErrors]);
+    setServerError(null);
+  }, [getInitialFormValues, clearErrors, setServerError]);
 
   return {
     values,

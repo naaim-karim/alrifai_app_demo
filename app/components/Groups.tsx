@@ -9,14 +9,14 @@ import Loading from "./Loading";
 import { notFound, redirect } from "next/navigation";
 import { fetchGroups } from "@/services/groupService";
 import Image from "next/image";
+import CreatePopup from "./CreatePopup";
+import supabase from "@/lib/supabaseClient";
 
 const Groups = () => {
   const [groups, setGroups] = useState<GroupData[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
-  const [groupName, setGroupName] = useState("");
-  const [description, setDescription] = useState("");
   const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
@@ -32,6 +32,39 @@ const Groups = () => {
       }
     };
     loadGroups();
+  }, []);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("groups-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "groups",
+        },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            setGroups((prev) => [payload.new, ...prev]);
+          } else if (payload.eventType === "UPDATE") {
+            setGroups((prev) =>
+              prev.map((group) =>
+                group.id === payload.new.id ? payload.new : group
+              )
+            );
+          } else if (payload.eventType === "DELETE") {
+            setGroups((prev) =>
+              prev.filter((group) => group.id !== payload.old.id)
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const filteredGroups = useMemo(() => {
@@ -108,9 +141,12 @@ const Groups = () => {
                 height={1024}
                 className="max-w-full h-auto mb-4"
               />
-              <h2 className="text-lg font-semibold text-right">
-                {capitalize(group.group_name || "")}
-              </h2>
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold text-right">
+                  {capitalize(group.group_name || "")}
+                </h2>
+                <span>{group.closed ? "Closed" : "Open"}</span>
+              </div>
             </div>
           ))}
         </section>
@@ -122,38 +158,7 @@ const Groups = () => {
         Create New Group
       </button>
       {showCreatePopup && (
-        <div className="fixed inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-xl">
-            <h2 className="text-xl font-bold mb-4">Create New Group</h2>
-            <div className="space-y-4">
-              <input
-                type="text"
-                placeholder="Group Name"
-                className="input w-full"
-                value={groupName}
-                onChange={(e) => setGroupName(e.target.value)}
-              />
-              <input
-                type="text"
-                placeholder="Description (optional)"
-                className="input w-full"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <button className="btn" onClick={() => setShowCreatePopup(false)}>
-                Cancel
-              </button>
-              <button
-                className="btn dark-btn"
-                onClick={() => setShowCreatePopup(false)}
-              >
-                Create
-              </button>
-            </div>
-          </div>
-        </div>
+        <CreatePopup setShowCreatePopup={setShowCreatePopup} />
       )}
     </main>
   );

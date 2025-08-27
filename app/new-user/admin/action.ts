@@ -21,7 +21,6 @@ export const signUpNewAdminAction = async (
     username: fieldValidators.username,
     email: fieldValidators.email,
     joinedOn: fieldValidators.joinedOn,
-    group: fieldValidators.group,
     profileImage: fieldValidators.profileImage,
     role: fieldValidators.role,
   });

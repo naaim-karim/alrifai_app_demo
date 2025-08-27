@@ -19,7 +19,6 @@ const Students = () => {
     const loadStudents = async () => {
       try {
         const data = await fetchStudents();
-        console.log(data);
         setStudents(data);
       } catch {
       } finally {

@@ -4,14 +4,18 @@ import { GroupData } from "@/types";
 export const fetchGroups = async (): Promise<GroupData[]> => {
   const { data, error } = await supabase
     .from("groups")
-    .select("group_name, id")
-    .order("group_name", { ascending: true });
+    .select("group_name, id, closed")
+    .order("created_at", { ascending: false });
 
   if (error) {
     return [{ error: error.message }];
   }
 
-  return data.map((group) => ({ group_name: group.group_name, id: group.id }));
+  return data.map((group) => ({
+    group_name: group.group_name,
+    id: group.id,
+    closed: group.closed,
+  }));
 };
 
 export const fetchGroupMembers = async (

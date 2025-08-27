@@ -22,7 +22,6 @@ export const signUpNewStudentAction = async (
     email: fieldValidators.email,
     dateOfBirth: fieldValidators.dateOfBirth,
     joinedOn: fieldValidators.joinedOn,
-    group: fieldValidators.group,
     profileImage: fieldValidators.profileImage,
   });
 

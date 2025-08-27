@@ -14,7 +14,6 @@ export const uploadProfileImage = async (
     const { data, error } = await supabase.storage
       .from("profile-images")
       .upload(fileName, file);
-    console.log(data, error);
 
     if (error) {
       return null;

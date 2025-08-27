@@ -7,6 +7,8 @@ export const getFriendlyErrorMessage = (error: Error) => {
       "Too many attempts. Please wait a moment and try again.",
     "Signups not allowed for this instance":
       "Sign-ups are currently disabled. Please contact support or try again later.",
+    'duplicate key value violates unique constraint "groups_group_name_key"':
+      "Group name already exists. Please choose a different group name.",
   };
 
   return errorMap[error.message] || "Something went wrong. Please try again.";
