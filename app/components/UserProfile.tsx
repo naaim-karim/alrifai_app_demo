@@ -6,16 +6,37 @@ import { notFound, redirect } from "next/navigation";
 import { capitalize } from "@/lib/utils";
 import { LogOut } from "lucide-react";
 import Loading from "./Loading";
+import toast from "react-hot-toast";
+import { useState } from "react";
 
 const UserProfile = ({ username }: { username: string }) => {
   const { user, loading, signOut } = useAuth();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      setIsSigningOut(true);
+      const { success, error } = await signOut();
+      if (!success) {
+        throw error;
+      }
+    } catch (error) {
+      setIsSigningOut(false);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred. Please try again later.";
+      toast.error(errorMessage);
+    }
+  };
 
   if (loading) {
     return <Loading />;
   }
 
-  if (!user) redirect("/signin?m=sr");
-  if (user.user_metadata.username !== username.toLowerCase()) notFound();
+  if (!user && !isSigningOut) redirect("/signin?m=sr");
+  if (!user && isSigningOut) redirect("/signin");
+  if (user?.user_metadata.username !== username.toLowerCase()) notFound();
 
   return (
     <main className="main-container flex-grow-1">
@@ -53,10 +74,11 @@ const UserProfile = ({ username }: { username: string }) => {
       {/* Sign Out */}
       <section className="py-8">
         <button
-          onClick={signOut}
+          onClick={handleSignOut}
           className="btn bg-gray-200 text-primary w-full flex justify-center items-center"
+          disabled={isSigningOut}
         >
-          {loading ? "Signing Out..." : "Sign Out"}
+          {isSigningOut ? "Signing Out..." : "Sign Out"}
           <LogOut className="ml-2 size-5" />
         </button>
       </section>

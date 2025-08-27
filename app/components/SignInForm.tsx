@@ -13,6 +13,7 @@ const SignInForm = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   useEffect(() => {
     const msg = searchParams.get("m");
@@ -28,6 +29,11 @@ const SignInForm = () => {
 
   const signInFormConfig = useMemo(() => getSignInFormConfig(), []);
   const { error, isPending, submitAction } = useSignInMagicLink();
+  useEffect(() => {
+    if (error) {
+      setServerError(error.message);
+    }
+  }, [error]);
   const {
     values,
     errors,
@@ -36,7 +42,7 @@ const SignInForm = () => {
     handleFieldBlur,
     validateAllFields,
     clearErrors,
-  } = useFormFields(signInFormConfig);
+  } = useFormFields(signInFormConfig, setServerError);
 
   const handleSubmit = async (formData: FormData) => {
     clearErrors();
@@ -85,14 +91,14 @@ const SignInForm = () => {
             elementRef={refs[field.name]}
           />
         ))}
-        {error && (
+        {serverError && (
           <p
-            id="signin-error"
+            id="signup-error"
             className="text-red-500 text-sm p-1 text-center"
             role="alert"
           >
-            {error.message ||
-              "An error occurred while signing in. Please try again."}
+            {serverError ||
+              "An error occurred while signing up. Please try again."}
           </p>
         )}
         <button
