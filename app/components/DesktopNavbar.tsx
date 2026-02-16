@@ -49,23 +49,23 @@ const DesktopNavbar = () => {
           )}
           {user && user.user_metadata.role === "admin" && (
             <li
-              className="mega-menu cursor-pointer"
+              className="mega-menu"
               onClick={() => {
                 setIsMenuOpen(!isMenuOpen);
                 setIsRotated(!isRotated);
               }}
             >
-              <span className="flex items-center gap-1">
+              <button className="flex items-center gap-1 cursor-pointer">
                 <CircleChevronDown
                   className={`text-black size-5 transition-all duration-300 ${
                     isRotated ? "arrow-rotated" : ""
                   }`}
                 />
                 Add New
-              </span>
+              </button>
               <ul
                 id="mega-menu"
-                className={`absolute right-20 flex flex-col bg-white rounded-b-xl border border-gray-200 p-4 gap-2 transition-all duration-300 ease-in-out ${
+                className={`absolute right-20 flex flex-col bg-white rounded-b-xl border border-gray-200 p-3 gap-3 transition-all duration-300 ease-in-out ${
                   isMenuOpen ? "mega-menu-opened" : "mega-menu-closed"
                 }`}
               >
