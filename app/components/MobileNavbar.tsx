@@ -2,14 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  CircleChevronLeft,
-  CircleChevronRight,
-  CircleUser,
-} from "lucide-react";
+import { CircleUser } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Loading from "./Loading";
+import {
+  Bars3BottomRightIcon,
+  Bars3BottomLeftIcon,
+} from "@heroicons/react/24/solid";
 
 const MobileNavbar = () => {
   const { user, loading } = useAuth();
@@ -25,7 +25,7 @@ const MobileNavbar = () => {
         className="cursor-pointer mr-auto"
         onClick={() => setIsOpen(true)}
       >
-        <CircleChevronLeft className="size-8" />
+        <Bars3BottomLeftIcon className="size-8" />
       </button>
       {isOpen && (
         <>
@@ -40,7 +40,7 @@ const MobileNavbar = () => {
                 className="cursor-pointer"
                 onClick={() => setIsOpen(false)}
               >
-                <CircleChevronRight className="size-8" />
+                <Bars3BottomRightIcon className="size-8" />
               </button>
             </div>
             <ul className="flex flex-col gap-4">
