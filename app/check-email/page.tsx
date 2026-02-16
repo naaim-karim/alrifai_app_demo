@@ -49,11 +49,19 @@ const CheckEmailPage = () => {
           <h1 className="text-xl font-bold mb-4 md:text-2xl">
             Check Your Email
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 mb-4">
             {
               "We've sent you a sign-in link. Please click the link in the email to sign in to your account."
             }
           </p>
+          <a
+            href="https://mail.google.com/mail/u/0/#inbox"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn dark-btn mb-4"
+          >
+            Open My Inbox
+          </a>
           <p className="text-sm text-gray-500">
             {"Didn't receive the email? Check your spam folder or "}
             <Link href="/contact" className="text-primary font-semibold">

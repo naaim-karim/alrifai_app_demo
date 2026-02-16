@@ -22,7 +22,7 @@ export const middleware = async (request: NextRequest) => {
           });
         },
       },
-    }
+    },
   );
 
   const pathname = request.nextUrl.pathname;
@@ -37,7 +37,7 @@ export const middleware = async (request: NextRequest) => {
       });
       return response;
     } else {
-      return new NextResponse("Forbidden", { status: 403 });
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 
