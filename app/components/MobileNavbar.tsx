@@ -6,10 +6,8 @@ import { CircleUser } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Loading from "./Loading";
-import {
-  Bars3BottomRightIcon,
-  Bars3BottomLeftIcon,
-} from "@heroicons/react/24/solid";
+import { Bars3BottomLeftIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { capitalize } from "@/lib/utils";
 
 const MobileNavbar = () => {
   const { user, loading } = useAuth();
@@ -30,17 +28,19 @@ const MobileNavbar = () => {
       {isOpen && (
         <>
           <div
-            className="absolute inset-0 bg-black/50 cursor-pointer z-40"
+            className="fixed inset-0 bg-black/50 cursor-pointer z-40"
             onClick={() => setIsOpen(false)}
           />
           <div className="mobile-nav">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-xl font-bold">Menu</h2>
+              <h2 className="text-xl font-bold">
+                {user ? capitalize(user.user_metadata.fullname) : "Menu"}
+              </h2>
               <button
                 className="cursor-pointer"
                 onClick={() => setIsOpen(false)}
               >
-                <Bars3BottomRightIcon className="size-8" />
+                <XMarkIcon className="size-8" />
               </button>
             </div>
             <ul className="flex flex-col gap-4">
