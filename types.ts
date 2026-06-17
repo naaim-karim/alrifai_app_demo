@@ -62,7 +62,7 @@ export interface SignUpUserData {
   fullname: string;
   username: string;
   joinedOn: string;
-  group: string;
+  group?: string;
   dateOfBirth?: string;
   role?: string;
   profileImage?: File;
@@ -86,6 +86,13 @@ export interface GroupData {
 export interface LessonContentsData {
   lesson_name?: string;
   lesson_book?: string;
+  error?: string;
+}
+
+export interface ScoreData {
+  name: string;
+  score: number;
+  group: string;
   error?: string;
 }
 

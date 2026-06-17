@@ -37,3 +37,16 @@ export const fetchTeacherUsernames = async () => {
 
   return data.map((teacher) => teacher.username);
 };
+
+export const fetchTeacherAssistantUsernames = async () => {
+  const { data, error } = await supabase
+    .from("teacher_profiles")
+    .select("username")
+    .eq("role", "teacher_assistant");
+
+  if (error) {
+    return [error.message];
+  }
+
+  return data.map((teacherAssistant) => teacherAssistant.username);
+};

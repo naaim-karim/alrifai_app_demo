@@ -68,13 +68,15 @@ export const getStudentSignUpFormConfig = async (): Promise<FormField[]> => {
   ];
 };
 
-export const getAdminSignUpFormConfig = async (): Promise<FormField[]> => {
+export const getAdminSignUpFormConfig = async (
+  role?: string
+): Promise<FormField[]> => {
   const groups = await fetchGroups();
   const groupOptions = groups
     .map((group) => group.group_name)
     .filter((name): name is string => name !== undefined);
 
-  return [
+  const fields: FormField[] = [
     {
       name: "fullname",
       label: "Full Name",
@@ -105,7 +107,7 @@ export const getAdminSignUpFormConfig = async (): Promise<FormField[]> => {
       label: "Role",
       type: "datalist",
       id: "role",
-      options: ["admin", "teacher"],
+      options: ["admin", "teacher", "teacher_assistant"],
       validation: fieldValidators.role,
     },
     {
@@ -116,7 +118,10 @@ export const getAdminSignUpFormConfig = async (): Promise<FormField[]> => {
       defaultValue: new Date().toISOString().split("T")[0],
       validation: fieldValidators.joinedOn,
     },
-    {
+  ];
+
+  if (role === "teacher") {
+    fields.push({
       name: "group",
       label: "Group",
       type: "datalist",
@@ -124,13 +129,16 @@ export const getAdminSignUpFormConfig = async (): Promise<FormField[]> => {
       options: groupOptions,
       placeholder: "Select Group",
       validation: fieldValidators.group,
-    },
-    {
-      name: "profileImage",
-      label: "Profile Image",
-      type: "file",
-      id: "profile-image",
-      validation: fieldValidators.profileImage,
-    },
-  ];
+    });
+  }
+
+  fields.push({
+    name: "profileImage",
+    label: "Profile Image",
+    type: "file",
+    id: "profile-image",
+    validation: fieldValidators.profileImage,
+  });
+
+  return fields;
 };
