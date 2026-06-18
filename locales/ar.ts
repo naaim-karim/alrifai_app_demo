@@ -141,7 +141,6 @@ const ar: Dictionary = {
   },
   addScorePopup: {
     title: "إضافة طالب",
-    fullNamePlaceholder: "الاسم الكامل",
     cancel: "إلغاء",
     add: "إضافة",
     successToast: "تمت إضافة الطالب بنجاح!",
@@ -160,8 +159,10 @@ const ar: Dictionary = {
     goHome: "العودة إلى الرئيسية",
   },
   formFields: {
-    fullname: "الاسم الكامل",
-    fullnamePlaceholder: "مثال: محمد صادق",
+    firstName: "الاسم الأول",
+    firstNamePlaceholder: "مثال: محمد",
+    lastName: "اسم العائلة",
+    lastNamePlaceholder: "مثال: صادق",
     username: "اسم المستخدم",
     usernamePlaceholder: "مثال: sadik123",
     dateOfBirth: "تاريخ الميلاد",
@@ -178,7 +179,6 @@ const ar: Dictionary = {
     required: "{field} مطلوب",
     minLength: "{field} يجب أن يحتوي على {min} أحرف على الأقل",
     fullnameLetters: "الاسم الكامل يجب أن يحتوي على أحرف ومسافات فقط",
-    fullnameWords: "الاسم الكامل يجب أن يحتوي على كلمتين على الأقل",
     emailInvalid: "يرجى إدخال بريد إلكتروني صحيح",
     usernameChars: "اسم المستخدم يمكن أن يحتوي فقط على أحرف وأرقام وشرطة سفلية",
     usernameTaken: "اسم المستخدم مستخدم بالفعل",

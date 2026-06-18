@@ -13,13 +13,21 @@ export const getStudentSignUpFormConfig = async (
 
   return [
     {
-      name: "fullname",
-      label: t("formFields.fullname"),
+      name: "firstName",
+      label: t("formFields.firstName"),
       type: "text",
-      placeholder: t("formFields.fullnamePlaceholder"),
-      id: "fullname",
+      placeholder: t("formFields.firstNamePlaceholder"),
+      id: "first-name",
       autoFocus: true,
-      validation: fieldValidators.fullname,
+      validation: fieldValidators.firstName,
+    },
+    {
+      name: "lastName",
+      label: t("formFields.lastName"),
+      type: "text",
+      placeholder: t("formFields.lastNamePlaceholder"),
+      id: "last-name",
+      validation: fieldValidators.lastName,
     },
     {
       name: "username",
@@ -83,13 +91,21 @@ export const getAdminSignUpFormConfig = async (
 
   const fields: FormField[] = [
     {
-      name: "fullname",
-      label: t("formFields.fullname"),
+      name: "firstName",
+      label: t("formFields.firstName"),
       type: "text",
-      placeholder: t("formFields.fullnamePlaceholder"),
-      id: "fullname",
+      placeholder: t("formFields.firstNamePlaceholder"),
+      id: "first-name",
       autoFocus: true,
-      validation: fieldValidators.fullname,
+      validation: fieldValidators.firstName,
+    },
+    {
+      name: "lastName",
+      label: t("formFields.lastName"),
+      type: "text",
+      placeholder: t("formFields.lastNamePlaceholder"),
+      id: "last-name",
+      validation: fieldValidators.lastName,
     },
     {
       name: "username",

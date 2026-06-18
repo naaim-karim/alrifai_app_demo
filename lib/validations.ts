@@ -90,12 +90,9 @@ export const getValidations = (t: (key: string) => string) => ({
 
   fullname: (value: FormValue): ValidationResult => {
     if (typeof value !== "string") return null;
-    const fullnameRegex = /^[a-zA-Z ]+$/;
+    const fullnameRegex = /^[a-zA-Z؀-ۿ ]+$/;
     if (!fullnameRegex.test(value)) {
       return t("validationMessages.fullnameLetters");
-    }
-    if (!value.includes(" ") || value.split(" ").length < 2) {
-      return t("validationMessages.fullnameWords");
     }
     return null;
   },
@@ -239,7 +236,7 @@ export const getValidations = (t: (key: string) => string) => ({
   scoreName: async (value: FormValue): Promise<ValidationResult> => {
     if (typeof value !== "string") return null;
 
-    if (!/^[a-zA-Z ]+$/.test(value)) {
+    if (!/^[a-zA-Z؀-ۿ ]+$/.test(value)) {
       return t("validationMessages.scoreNameLetters");
     }
 
@@ -273,9 +270,15 @@ export const getFieldValidators = (t: (key: string) => string) => {
   const validations = getValidations(t);
 
   return {
-    fullname: createValidator(
-      validations.required(t("formFields.fullname")),
-      validations.minLength(2, t("formFields.fullname")),
+    firstName: createValidator(
+      validations.required(t("formFields.firstName")),
+      validations.minLength(2, t("formFields.firstName")),
+      validations.fullname
+    ),
+
+    lastName: createValidator(
+      validations.required(t("formFields.lastName")),
+      validations.minLength(2, t("formFields.lastName")),
       validations.fullname
     ),
 

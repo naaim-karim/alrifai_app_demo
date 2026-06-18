@@ -23,7 +23,8 @@ export const useSignUpMagicLink = (resetForm: () => void) => {
 
         if (!result?.success) {
           return new Error(
-            result?.errors?.fullname ||
+            result?.errors?.firstName ||
+              result?.errors?.lastName ||
               result?.errors?.username ||
               result?.errors?.dateOfBirth ||
               result?.errors?.email ||
