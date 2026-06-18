@@ -3,13 +3,17 @@ import {
   fetchStudentUsernames,
   fetchAdminUsernames,
   fetchTeacherUsernames,
+  fetchTeacherAssistantUsernames,
 } from "@/services/usernameService";
+import { fetchScoreNames } from "@/services/scoresService";
 import type { ValidationResult, ValidationFunction, FormValue } from "@/types";
 
 let groupOptionsCache: string[] | null = null;
 let studentUsernamesCache: string[] | null = null;
 let adminUsernamesCache: string[] | null = null;
 let teacherUsernamesCache: string[] | null = null;
+let teacherAssistantUsernamesCache: string[] | null = null;
+let scoreNamesCache: string[] | null = null;
 
 const getGroupOptions = async (): Promise<string[]> => {
   if (!groupOptionsCache) {
@@ -40,6 +44,20 @@ const getTeacherUsernames = async (): Promise<string[]> => {
     teacherUsernamesCache = await fetchTeacherUsernames();
   }
   return teacherUsernamesCache;
+};
+
+const getTeacherAssistantUsernames = async (): Promise<string[]> => {
+  if (!teacherAssistantUsernamesCache) {
+    teacherAssistantUsernamesCache = await fetchTeacherAssistantUsernames();
+  }
+  return teacherAssistantUsernamesCache;
+};
+
+const getScoreNames = async (): Promise<string[]> => {
+  if (!scoreNamesCache) {
+    scoreNamesCache = await fetchScoreNames();
+  }
+  return scoreNamesCache;
 };
 
 export const validations = {
@@ -91,6 +109,7 @@ export const validations = {
     const studentUsernames = await getStudentUsernames();
     const adminUsernames = await getAdminUsernames();
     const teacherUsernames = await getTeacherUsernames();
+    const teacherAssistantUsernames = await getTeacherAssistantUsernames();
 
     const studentUsername = studentUsernames.find(
       (username) => username.toLowerCase() === value.toLowerCase()
@@ -101,10 +120,18 @@ export const validations = {
     const teacherUsername = teacherUsernames.find(
       (username) => username.toLowerCase() === value.toLowerCase()
     );
+    const teacherAssistantUsername = teacherAssistantUsernames.find(
+      (username) => username.toLowerCase() === value.toLowerCase()
+    );
     if (!/^[a-zA-Z0-9_]+$/.test(value)) {
       return "Username can only contain letters, numbers, and underscores";
     }
-    if (studentUsername || adminUsername || teacherUsername) {
+    if (
+      studentUsername ||
+      adminUsername ||
+      teacherUsername ||
+      teacherAssistantUsername
+    ) {
       return "Username is already taken";
     }
     return null;
@@ -185,10 +212,27 @@ export const validations = {
   role: (value: FormValue): ValidationResult => {
     if (typeof value !== "string") return null;
 
-    const selectedOption = ["admin", "teacher"].find(
+    const selectedOption = ["admin", "teacher", "teacher_assistant"].find(
       (option) => option.toLowerCase() === value.toLowerCase()
     );
     return !selectedOption ? `${value} is not an option` : null;
+  },
+
+  scoreName: async (value: FormValue): Promise<ValidationResult> => {
+    if (typeof value !== "string") return null;
+
+    if (!/^[a-zA-Z ]+$/.test(value)) {
+      return "Name can only contain letters and spaces";
+    }
+
+    const scoreNames = await getScoreNames();
+    const existingName = scoreNames.find(
+      (name) => name.toLowerCase() === value.trim().toLowerCase()
+    );
+    if (existingName) {
+      return "This student is already in the score list";
+    }
+    return null;
   },
 };
 
@@ -240,6 +284,12 @@ export const fieldValidators = {
   profileImage: createValidator(
     validations.fileSize(5),
     validations.fileType(["image/png", "image/jpeg", "image/webp"])
+  ),
+
+  scoreName: createValidator(
+    validations.required("Name"),
+    validations.minLength(2, "Name"),
+    validations.scoreName
   ),
 };
 

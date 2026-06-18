@@ -21,6 +21,11 @@ export const capitalize = (str: string) => {
   return result;
 };
 
+export const getProfileRole = (role?: string) => {
+  if (role === "teacher_assistant") return "teacher";
+  return role || "student";
+};
+
 export const getAge = (dateOfBirth: string) => {
   const today = new Date();
   const birthDate = new Date(dateOfBirth);

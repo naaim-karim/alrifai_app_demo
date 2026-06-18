@@ -7,6 +7,7 @@ import Loading from "./Loading";
 import { useEffect } from "react";
 import supabase from "@/lib/supabaseClient";
 import toast from "react-hot-toast";
+import { getProfileRole } from "@/lib/utils";
 
 const HomePage = () => {
   const { user, loading } = useAuth();
@@ -53,9 +54,9 @@ const HomePage = () => {
             </p>
             {user ? (
               <Link
-                href={`/u/${
-                  user.user_metadata.role ? user.user_metadata.role : "student"
-                }/${user.user_metadata.username}`}
+                href={`/u/${getProfileRole(user.user_metadata.role)}/${
+                  user.user_metadata.username
+                }`}
                 className="btn light-btn inline-block mx-auto lg:mx-0"
               >
                 Dashboard

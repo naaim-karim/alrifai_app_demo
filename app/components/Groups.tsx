@@ -9,6 +9,7 @@ import Loading from "./Loading";
 import { notFound, redirect } from "next/navigation";
 import { fetchGroups } from "@/services/groupService";
 import Image from "next/image";
+import Link from "next/link";
 import CreatePopup from "./CreatePopup";
 import supabase from "@/lib/supabaseClient";
 
@@ -23,9 +24,7 @@ const Groups = () => {
     const loadGroups = async () => {
       try {
         const data = await fetchGroups();
-        setGroups(
-          data.filter((group) => group.group_name?.toLowerCase() !== "admin")
-        );
+        setGroups(data);
       } catch {
       } finally {
         setLoading(false);
@@ -86,8 +85,11 @@ const Groups = () => {
     return <Loading />;
   }
 
+  const isAdmin = user?.user_metadata.role === "admin";
+  const isTeacherAssistant = user?.user_metadata.role === "teacher_assistant";
+
   if (!user) redirect("/signin?m=sr");
-  if (user.user_metadata.role !== "admin") notFound();
+  if (!isAdmin && !isTeacherAssistant) notFound();
 
   if (loading) {
     return (
@@ -130,9 +132,10 @@ const Groups = () => {
       {filteredGroups.length > 0 && (
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredGroups.map((group) => (
-            <div
+            <Link
               key={group.id}
-              className="border border-gray-200 rounded-lg p-4 bg-white shadow-2xl hover:scale-105 transition-transform duration-200"
+              href={`/scores/manage/${group.group_name}`}
+              className="border border-gray-200 rounded-lg p-4 bg-white shadow-2xl hover:scale-105 transition-transform duration-200 cursor-pointer"
             >
               <Image
                 src="/group.png"
@@ -147,17 +150,19 @@ const Groups = () => {
                 </h2>
                 <span>{group.closed ? "Closed" : "Open"}</span>
               </div>
-            </div>
+            </Link>
           ))}
         </section>
       )}
-      <button
-        className="btn dark-btn mt-8 block mx-auto lg:ml-auto lg:mx-0"
-        onClick={() => setShowCreatePopup(true)}
-      >
-        Create New Group
-      </button>
-      {showCreatePopup && (
+      {isAdmin && (
+        <button
+          className="btn dark-btn mt-8 block mx-auto lg:ml-auto lg:mx-0"
+          onClick={() => setShowCreatePopup(true)}
+        >
+          Create New Group
+        </button>
+      )}
+      {isAdmin && showCreatePopup && (
         <CreatePopup setShowCreatePopup={setShowCreatePopup} />
       )}
     </main>

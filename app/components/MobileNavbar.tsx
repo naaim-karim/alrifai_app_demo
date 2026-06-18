@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Loading from "./Loading";
 import { Bars3BottomLeftIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import { capitalize } from "@/lib/utils";
+import { capitalize, getProfileRole } from "@/lib/utils";
 
 const MobileNavbar = () => {
   const { user, loading } = useAuth();
@@ -50,22 +50,36 @@ const MobileNavbar = () => {
               <li>
                 <Link href="/contact">Contact</Link>
               </li>
+              <li>
+                <Link href="/scores">Scores</Link>
+              </li>
               {user && (
                 <li>
                   <Link
                     href={
-                      user.user_metadata.role === "admin"
+                      user.user_metadata.role === "admin" ||
+                      user.user_metadata.role === "teacher_assistant"
                         ? `/groups`
                         : `/group/${user.user_metadata.group}`
                     }
                   >
-                    {user.user_metadata.role === "admin" ? "Groups" : "Group"}
+                    {user.user_metadata.role === "admin" ||
+                    user.user_metadata.role === "teacher_assistant"
+                      ? "Groups"
+                      : "Group"}
                   </Link>
                 </li>
               )}
               {user && user.user_metadata.role === "admin" && (
                 <li>
                   <Link href={`/students`}>Students</Link>
+                </li>
+              )}
+              {user && user.user_metadata.role === "teacher" && (
+                <li>
+                  <Link href={`/scores/manage/${user.user_metadata.group}`}>
+                    Edit Scores
+                  </Link>
                 </li>
               )}
               {user && user.user_metadata.role === "admin" && (
@@ -92,9 +106,9 @@ const MobileNavbar = () => {
       </Link>
       {user ? (
         <Link
-          href={`/u/${
-            user.user_metadata.role ? user.user_metadata.role : "student"
-          }/${user.user_metadata.username}`}
+          href={`/u/${getProfileRole(user.user_metadata.role)}/${
+            user.user_metadata.username
+          }`}
           className="ml-auto"
         >
           {user.user_metadata.profileImageUrl ? (

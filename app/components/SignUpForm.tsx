@@ -22,22 +22,6 @@ const SignUpForm = () => {
   const pathname = usePathname();
   const { user, loading: authLoading } = useAuth();
 
-  useEffect(() => {
-    const loadFormConfig = async () => {
-      try {
-        const signUpFormConfig = pathname.includes("admin")
-          ? await getAdminSignUpFormConfig()
-          : await getStudentSignUpFormConfig();
-        setSignUpFormConfig(signUpFormConfig);
-      } catch {
-        setSignUpFormConfig([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadFormConfig();
-  }, [pathname]);
   const {
     values,
     errors,
@@ -48,6 +32,23 @@ const SignUpForm = () => {
     clearErrors,
     resetForm,
   } = useFormFields(signUpFormConfig, setServerError);
+
+  useEffect(() => {
+    const loadFormConfig = async () => {
+      try {
+        const signUpFormConfig = pathname.includes("admin")
+          ? await getAdminSignUpFormConfig(values.role as string | undefined)
+          : await getStudentSignUpFormConfig();
+        setSignUpFormConfig(signUpFormConfig);
+      } catch {
+        setSignUpFormConfig([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFormConfig();
+  }, [pathname, values.role]);
   const { error, submitAction, isPending } = useSignUpMagicLink(resetForm);
   useEffect(() => {
     if (error) {

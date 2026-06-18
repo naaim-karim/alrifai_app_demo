@@ -102,7 +102,7 @@ export const AuthProvider = ({
             username: userData.username.toLowerCase(),
             dateOfBirth: userData.dateOfBirth,
             joinedOn: userData.joinedOn,
-            group: userData.group.toLowerCase(),
+            group: userData.group ? userData.group.toLowerCase() : null,
             profileImageUrl: profileImageUrl,
             role: userData.role?.toLowerCase(),
           },
