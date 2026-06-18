@@ -1,20 +1,21 @@
+"use client";
+
 import Footer from "@/app/components/Footer";
 import Navbar from "@/app/components/Navbar";
 import Image from "next/image";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const NotFound = () => {
+  const { t } = useLanguage();
   return (
     <>
       <Navbar />
       <main className="main-container flex-grow-1 py-8 text-center">
         <h1 className="text-3xl font-bold mb-4 md:text-4xl">
-          Oops! Page Not Found
+          {t("notFound.title")}
         </h1>
-        <p className="mb-8">
-          The page you are looking for might have been removed, had its name
-          changed, or is temporarily unavailable.
-        </p>
+        <p className="mb-8">{t("notFound.body")}</p>
         <Image
           src="/notFound.png"
           alt="404 Not Found"
@@ -23,7 +24,7 @@ const NotFound = () => {
           className="mx-auto w-2xl max-w-full rounded-xl"
         />
         <Link href="/" className="btn dark-btn inline-block mt-8">
-          Go to Home
+          {t("notFound.goHome")}
         </Link>
       </main>
       <Footer />

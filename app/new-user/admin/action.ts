@@ -1,11 +1,16 @@
 "use server";
 
-import { fieldValidators, validateFormData } from "@/lib/validations";
+import { cookies } from "next/headers";
+import { getTranslator, type Locale } from "@/locales";
+import { getFieldValidators, validateFormData } from "@/lib/validations";
 import { SignUpUserData, SignUpResult } from "@/types";
 
 export const signUpNewAdminAction = async (
   formData: FormData
 ): Promise<SignUpResult> => {
+  const locale = ((await cookies()).get("locale")?.value as Locale) || "en";
+  const fieldValidators = getFieldValidators(getTranslator(locale));
+
   const data: SignUpUserData = {
     fullname: formData.get("fullname")?.toString() || "",
     username: formData.get("username")?.toString() || "",

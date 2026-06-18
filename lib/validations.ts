@@ -60,24 +60,30 @@ const getScoreNames = async (): Promise<string[]> => {
   return scoreNamesCache;
 };
 
-export const validations = {
+export const getValidations = (t: (key: string) => string) => ({
   required:
     (fieldName: string): ValidationFunction =>
     (value: FormValue): ValidationResult => {
+      const message = t("validationMessages.required").replace(
+        "{field}",
+        fieldName
+      );
       if (typeof value === "string") {
-        return !value?.trim() ? `${fieldName} is required` : null;
+        return !value?.trim() ? message : null;
       }
       if (value instanceof File) {
         return null;
       }
-      return `${fieldName} is required`;
+      return message;
     },
 
   minLength:
     (min: number, fieldName: string): ValidationFunction =>
     (value: FormValue) => {
       if (typeof value === "string" && value && value.length < min) {
-        return `${fieldName} must be at least ${min} characters`;
+        return t("validationMessages.minLength")
+          .replace("{field}", fieldName)
+          .replace("{min}", String(min));
       }
       return null;
     },
@@ -86,10 +92,10 @@ export const validations = {
     if (typeof value !== "string") return null;
     const fullnameRegex = /^[a-zA-Z ]+$/;
     if (!fullnameRegex.test(value)) {
-      return "Full name can only contain letters and spaces";
+      return t("validationMessages.fullnameLetters");
     }
     if (!value.includes(" ") || value.split(" ").length < 2) {
-      return "Full name must be at least 2 words";
+      return t("validationMessages.fullnameWords");
     }
     return null;
   },
@@ -98,7 +104,7 @@ export const validations = {
     if (typeof value !== "string") return null;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(value)) {
-      return "Please enter a valid email address";
+      return t("validationMessages.emailInvalid");
     }
     return null;
   },
@@ -124,7 +130,7 @@ export const validations = {
       (username) => username.toLowerCase() === value.toLowerCase()
     );
     if (!/^[a-zA-Z0-9_]+$/.test(value)) {
-      return "Username can only contain letters, numbers, and underscores";
+      return t("validationMessages.usernameChars");
     }
     if (
       studentUsername ||
@@ -132,7 +138,7 @@ export const validations = {
       teacherUsername ||
       teacherAssistantUsername
     ) {
-      return "Username is already taken";
+      return t("validationMessages.usernameTaken");
     }
     return null;
   },
@@ -147,7 +153,7 @@ export const validations = {
       const age = today.getFullYear() - date.getFullYear();
 
       if (age < minAge) {
-        return `You must be at least ${minAge} years old`;
+        return t("validationMessages.ageMin").replace("{min}", String(minAge));
       }
       return null;
     },
@@ -159,7 +165,7 @@ export const validations = {
     const today = new Date();
 
     if (date > today) {
-      return "Date cannot be in the future";
+      return t("validationMessages.dateFuture");
     }
     return null;
   },
@@ -173,7 +179,10 @@ export const validations = {
 
       const maxSizeBytes = maxSizeMB * 1024 * 1024;
       if (value.size > maxSizeBytes) {
-        return `File size must be less than ${maxSizeMB}MB`;
+        return t("validationMessages.fileSizeMax").replace(
+          "{max}",
+          String(maxSizeMB)
+        );
       }
       return null;
     },
@@ -187,7 +196,10 @@ export const validations = {
         const typeNames = allowedTypes.map((type) =>
           type.split("/")[1].toUpperCase()
         );
-        return `Only ${typeNames.join(", ")} files are allowed`;
+        return t("validationMessages.fileTypeAllowed").replace(
+          "{types}",
+          typeNames.join(", ")
+        );
       }
       return null;
     },
@@ -195,7 +207,9 @@ export const validations = {
   fileRequired:
     (fieldName: string): ValidationFunction =>
     (value: FormValue) => {
-      if (!(value instanceof File)) return `${fieldName} is required`;
+      if (!(value instanceof File)) {
+        return t("validationMessages.required").replace("{field}", fieldName);
+      }
       return null;
     },
 
@@ -206,7 +220,9 @@ export const validations = {
     const selectedOption = groupOptions.find(
       (option) => option.toLowerCase() === value.toLowerCase()
     );
-    return !selectedOption ? `${value} is not an option` : null;
+    return !selectedOption
+      ? t("validationMessages.notOption").replace("{value}", value)
+      : null;
   },
 
   role: (value: FormValue): ValidationResult => {
@@ -215,14 +231,16 @@ export const validations = {
     const selectedOption = ["admin", "teacher", "teacher_assistant"].find(
       (option) => option.toLowerCase() === value.toLowerCase()
     );
-    return !selectedOption ? `${value} is not an option` : null;
+    return !selectedOption
+      ? t("validationMessages.notOption").replace("{value}", value)
+      : null;
   },
 
   scoreName: async (value: FormValue): Promise<ValidationResult> => {
     if (typeof value !== "string") return null;
 
     if (!/^[a-zA-Z ]+$/.test(value)) {
-      return "Name can only contain letters and spaces";
+      return t("validationMessages.scoreNameLetters");
     }
 
     const scoreNames = await getScoreNames();
@@ -230,11 +248,11 @@ export const validations = {
       (name) => name.toLowerCase() === value.trim().toLowerCase()
     );
     if (existingName) {
-      return "This student is already in the score list";
+      return t("validationMessages.scoreNameTaken");
     }
     return null;
   },
-};
+});
 
 export const createValidator = <T>(
   ...validators: (
@@ -251,46 +269,59 @@ export const createValidator = <T>(
   };
 };
 
-export const fieldValidators = {
-  fullname: createValidator(
-    validations.required("Full name"),
-    validations.minLength(2, "Full name"),
-    validations.fullname
-  ),
+export const getFieldValidators = (t: (key: string) => string) => {
+  const validations = getValidations(t);
 
-  username: createValidator(
-    validations.required("Username"),
-    validations.minLength(3, "Username"),
-    validations.username
-  ),
+  return {
+    fullname: createValidator(
+      validations.required(t("formFields.fullname")),
+      validations.minLength(2, t("formFields.fullname")),
+      validations.fullname
+    ),
 
-  email: createValidator(validations.required("Email"), validations.email),
+    username: createValidator(
+      validations.required(t("formFields.username")),
+      validations.minLength(3, t("formFields.username")),
+      validations.username
+    ),
 
-  dateOfBirth: createValidator(
-    validations.required("Date of birth"),
-    validations.date,
-    validations.age(8)
-  ),
+    email: createValidator(
+      validations.required(t("formFields.email")),
+      validations.email
+    ),
 
-  joinedOn: createValidator(
-    validations.required("Joined On"),
-    validations.date
-  ),
+    dateOfBirth: createValidator(
+      validations.required(t("formFields.dateOfBirth")),
+      validations.date,
+      validations.age(8)
+    ),
 
-  group: createValidator(validations.required("Group"), validations.group),
+    joinedOn: createValidator(
+      validations.required(t("formFields.joinedOn")),
+      validations.date
+    ),
 
-  role: createValidator(validations.required("Role"), validations.role),
+    group: createValidator(
+      validations.required(t("formFields.group")),
+      validations.group
+    ),
 
-  profileImage: createValidator(
-    validations.fileSize(5),
-    validations.fileType(["image/png", "image/jpeg", "image/webp"])
-  ),
+    role: createValidator(
+      validations.required(t("formFields.role")),
+      validations.role
+    ),
 
-  scoreName: createValidator(
-    validations.required("Name"),
-    validations.minLength(2, "Name"),
-    validations.scoreName
-  ),
+    profileImage: createValidator(
+      validations.fileSize(5),
+      validations.fileType(["image/png", "image/jpeg", "image/webp"])
+    ),
+
+    scoreName: createValidator(
+      validations.required(t("formFields.name")),
+      validations.minLength(2, t("formFields.name")),
+      validations.scoreName
+    ),
+  };
 };
 
 export const validateFormData = async <T extends Record<string, FormValue>>(

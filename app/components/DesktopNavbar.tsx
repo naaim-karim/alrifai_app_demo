@@ -3,13 +3,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { CircleChevronDown, CircleUser } from "lucide-react";
 import { useState } from "react";
 import Loading from "./Loading";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { getProfileRole } from "@/lib/utils";
 
 const DesktopNavbar = () => {
   const { user, loading } = useAuth();
+  const { t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRotated, setIsRotated] = useState(false);
 
@@ -25,13 +28,13 @@ const DesktopNavbar = () => {
       <div className="flex items-center gap-6">
         <ul className="flex items-center gap-6 font-medium">
           <li>
-            <Link href="/">Home</Link>
+            <Link href="/">{t("nav.home")}</Link>
           </li>
           <li>
-            <Link href="/contact">Contact</Link>
+            <Link href="/contact">{t("nav.contact")}</Link>
           </li>
           <li>
-            <Link href="/scores">Scores</Link>
+            <Link href="/scores">{t("nav.scores")}</Link>
           </li>
           {user && (
             <li>
@@ -45,20 +48,20 @@ const DesktopNavbar = () => {
               >
                 {user.user_metadata.role === "admin" ||
                 user.user_metadata.role === "teacher_assistant"
-                  ? "Groups"
-                  : "Group"}
+                  ? t("nav.groups")
+                  : t("nav.group")}
               </Link>
             </li>
           )}
           {user && user.user_metadata.role === "admin" && (
             <li>
-              <Link href={`/students`}>Students</Link>
+              <Link href={`/students`}>{t("nav.students")}</Link>
             </li>
           )}
           {user && user.user_metadata.role === "teacher" && (
             <li>
               <Link href={`/scores/manage/${user.user_metadata.group}`}>
-                Edit Scores
+                {t("nav.editScores")}
               </Link>
             </li>
           )}
@@ -76,17 +79,17 @@ const DesktopNavbar = () => {
                     isRotated ? "arrow-rotated" : ""
                   }`}
                 />
-                Add New
+                {t("nav.addNew")}
               </button>
               <ul
                 id="mega-menu"
-                className={`absolute right-20 flex flex-col bg-white rounded-b-xl border border-gray-200 p-3 gap-3 transition-all duration-300 ease-in-out ${
+                className={`absolute end-20 flex flex-col bg-white rounded-b-xl border border-gray-200 p-3 gap-3 transition-all duration-300 ease-in-out ${
                   isMenuOpen ? "mega-menu-opened" : "mega-menu-closed"
                 }`}
               >
                 <li>
                   <Link href={`/new-user/admin`} className="btn dark-btn block">
-                    New Admin
+                    {t("nav.newAdmin")}
                   </Link>
                 </li>
                 <li>
@@ -94,13 +97,14 @@ const DesktopNavbar = () => {
                     href={`/new-user/student`}
                     className="btn dark-btn block"
                   >
-                    New Student
+                    {t("nav.newStudent")}
                   </Link>
                 </li>
               </ul>
             </li>
           )}
         </ul>
+        <LanguageSwitcher />
         {user ? (
           <Link
             href={`/u/${getProfileRole(user.user_metadata.role)}/${
@@ -122,7 +126,7 @@ const DesktopNavbar = () => {
           </Link>
         ) : (
           <Link href="/signin" className="btn dark-btn">
-            Sign in
+            {t("common.signIn")}
           </Link>
         )}
       </div>

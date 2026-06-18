@@ -2,22 +2,25 @@ import supabase from "@/lib/supabaseClient";
 import { getFriendlyErrorMessage } from "@/lib/utils";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { validations } from "@/lib/validations";
+import { getValidations } from "@/lib/validations";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const CreatePopup = ({
   setShowCreatePopup,
 }: {
   setShowCreatePopup: (value: boolean) => void;
 }) => {
+  const { t } = useLanguage();
   const [groupName, setGroupName] = useState("");
   const [closed, setClosed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCreateGroup = useCallback(async () => {
     setIsSubmitting(true);
-    console.log(groupName);
-    const error = await validations.required("Group Name")(groupName);
-    const error2 = await validations.minLength(3, "Group Name")(groupName);
+    const validations = getValidations(t);
+    const groupNameLabel = t("createPopup.groupNamePlaceholder");
+    const error = await validations.required(groupNameLabel)(groupName);
+    const error2 = await validations.minLength(3, groupNameLabel)(groupName);
     if (error || error2) {
       toast.error(error || error2, { duration: 5000 });
       setIsSubmitting(false);
@@ -29,7 +32,7 @@ const CreatePopup = ({
       );
 
       if (idError) {
-        toast.error("Failed to generate group ID. Please try again.", {
+        toast.error(t("createPopup.idError"), {
           duration: 5000,
         });
       }
@@ -41,23 +44,23 @@ const CreatePopup = ({
       });
 
       if (error) {
-        toast.error(getFriendlyErrorMessage(error), {
+        toast.error(getFriendlyErrorMessage(error, t), {
           duration: 5000,
         });
       } else {
-        toast.success("Group created successfully!", {
+        toast.success(t("createPopup.successToast"), {
           duration: 5000,
         });
         setShowCreatePopup(false);
       }
     } catch {
-      toast.error("Unexpected error. Please try again.", {
+      toast.error(t("createPopup.unexpectedError"), {
         duration: 5000,
       });
     } finally {
       setIsSubmitting(false);
     }
-  }, [groupName, closed, setShowCreatePopup]);
+  }, [groupName, closed, setShowCreatePopup, t]);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -90,11 +93,11 @@ const CreatePopup = ({
         onSubmit={handleSubmit}
         className="bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-xl"
       >
-        <h2 className="text-xl font-bold mb-4">Create New Group</h2>
+        <h2 className="text-xl font-bold mb-4">{t("createPopup.title")}</h2>
         <div className="space-y-4">
           <input
             type="text"
-            placeholder="Group Name"
+            placeholder={t("createPopup.groupNamePlaceholder")}
             className="input w-full"
             value={groupName}
             onChange={(e) => setGroupName(e.target.value)}
@@ -113,7 +116,7 @@ const CreatePopup = ({
               required
               disabled={isSubmitting}
             />
-            Group is Closed
+            {t("createPopup.closedLabel")}
           </label>
           <label className="flex items-center gap-2">
             <input
@@ -126,7 +129,7 @@ const CreatePopup = ({
               required
               disabled={isSubmitting}
             />
-            Group is Open
+            {t("createPopup.openLabel")}
           </label>
         </div>
         <div className="flex justify-end gap-3 mt-6">
@@ -136,14 +139,14 @@ const CreatePopup = ({
             onClick={() => setShowCreatePopup(false)}
             disabled={isSubmitting}
           >
-            Cancel
+            {t("createPopup.cancel")}
           </button>
           <button
             type="submit"
             className="btn dark-btn"
             disabled={isSubmitting}
           >
-            Create
+            {t("createPopup.create")}
           </button>
         </div>
       </form>

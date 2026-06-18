@@ -8,10 +8,12 @@ import { Send } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const SignInForm = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { t } = useLanguage();
   const [message, setMessage] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -27,7 +29,7 @@ const SignInForm = () => {
     }
   }, [searchParams, router]);
 
-  const signInFormConfig = useMemo(() => getSignInFormConfig(), []);
+  const signInFormConfig = useMemo(() => getSignInFormConfig(t), [t]);
   const { error, isPending, submitAction } = useSignInMagicLink();
   useEffect(() => {
     if (error) {
@@ -57,7 +59,7 @@ const SignInForm = () => {
   return (
     <main className="main-container py-16 flex-grow-1">
       <h1 className="text-xl text-center mb-8 font-bold md:text-3xl">
-        Sign In To Your Account
+        {t("signin.title")}
       </h1>
       {message === "sr" && (
         <p
@@ -65,7 +67,7 @@ const SignInForm = () => {
           className="text-red-500 text-md p-1 text-center"
           role="alert"
         >
-          You need to sign in to your account first.
+          {t("signin.needSignIn")}
         </p>
       )}
       <Form
@@ -76,7 +78,7 @@ const SignInForm = () => {
         aria-describedby="form-description"
       >
         <p className="sr-only" id="form-description">
-          {"Enter your email address and we'll send you a secure sign-in link."}
+          {t("signin.formDescription")}
         </p>
 
         {signInFormConfig.map((field) => (
@@ -97,8 +99,7 @@ const SignInForm = () => {
             className="text-red-500 text-sm p-1 text-center"
             role="alert"
           >
-            {serverError ||
-              "An error occurred while signing up. Please try again."}
+            {serverError || t("signin.errorFallback")}
           </p>
         )}
         <button
@@ -107,14 +108,14 @@ const SignInForm = () => {
           disabled={isPending}
           aria-busy={isPending}
         >
-          {isPending ? "Sending Link..." : "Send Sign-In Link"}
-          <Send className="ml-2 size-5" />
+          {isPending ? t("signin.sending") : t("signin.sendLink")}
+          <Send className="ms-2 size-5" />
         </button>
       </Form>
       <p className="text-gray-500 text-center mt-4">
-        {"Having trouble signing in? "}
+        {t("signin.troubleSigningIn")}
         <Link href="/contact" className="text-primary font-semibold">
-          Get Help
+          {t("signin.getHelp")}
         </Link>
       </p>
     </main>

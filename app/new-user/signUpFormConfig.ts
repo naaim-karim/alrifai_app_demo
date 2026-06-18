@@ -1,8 +1,11 @@
-import { fieldValidators } from "@/lib/validations";
+import { getFieldValidators } from "@/lib/validations";
 import { fetchGroups } from "@/services/groupService";
 import type { FormField } from "@/types";
 
-export const getStudentSignUpFormConfig = async (): Promise<FormField[]> => {
+export const getStudentSignUpFormConfig = async (
+  t: (key: string) => string
+): Promise<FormField[]> => {
+  const fieldValidators = getFieldValidators(t);
   const groups = await fetchGroups();
   const groupOptions = groups
     .map((group) => group.group_name)
@@ -11,39 +14,39 @@ export const getStudentSignUpFormConfig = async (): Promise<FormField[]> => {
   return [
     {
       name: "fullname",
-      label: "Full Name",
+      label: t("formFields.fullname"),
       type: "text",
-      placeholder: "e.g Mohammad Sadik",
+      placeholder: t("formFields.fullnamePlaceholder"),
       id: "fullname",
       autoFocus: true,
       validation: fieldValidators.fullname,
     },
     {
       name: "username",
-      label: "Username",
+      label: t("formFields.username"),
       type: "text",
-      placeholder: "e.g sadik123",
+      placeholder: t("formFields.usernamePlaceholder"),
       id: "username",
       validation: fieldValidators.username,
     },
     {
       name: "dateOfBirth",
-      label: "Date of birth",
+      label: t("formFields.dateOfBirth"),
       type: "date",
       id: "date-of-birth",
       validation: fieldValidators.dateOfBirth,
     },
     {
       name: "email",
-      label: "Email",
+      label: t("formFields.email"),
       type: "email",
-      placeholder: "user@example.com",
+      placeholder: t("formFields.emailPlaceholder"),
       id: "email",
       validation: fieldValidators.email,
     },
     {
       name: "joinedOn",
-      label: "Joined On",
+      label: t("formFields.joinedOn"),
       type: "date",
       id: "joined-on",
       defaultValue: new Date().toISOString().split("T")[0],
@@ -51,16 +54,16 @@ export const getStudentSignUpFormConfig = async (): Promise<FormField[]> => {
     },
     {
       name: "group",
-      label: "Group",
+      label: t("formFields.group"),
       type: "datalist",
       id: "group",
       options: groupOptions,
-      placeholder: "Select Group",
+      placeholder: t("formFields.groupPlaceholder"),
       validation: fieldValidators.group,
     },
     {
       name: "profileImage",
-      label: "Profile Image",
+      label: t("formFields.profileImage"),
       type: "file",
       id: "profile-image",
       validation: fieldValidators.profileImage,
@@ -69,8 +72,10 @@ export const getStudentSignUpFormConfig = async (): Promise<FormField[]> => {
 };
 
 export const getAdminSignUpFormConfig = async (
+  t: (key: string) => string,
   role?: string
 ): Promise<FormField[]> => {
+  const fieldValidators = getFieldValidators(t);
   const groups = await fetchGroups();
   const groupOptions = groups
     .map((group) => group.group_name)
@@ -79,32 +84,32 @@ export const getAdminSignUpFormConfig = async (
   const fields: FormField[] = [
     {
       name: "fullname",
-      label: "Full Name",
+      label: t("formFields.fullname"),
       type: "text",
-      placeholder: "e.g Mohammad Sadik",
+      placeholder: t("formFields.fullnamePlaceholder"),
       id: "fullname",
       autoFocus: true,
       validation: fieldValidators.fullname,
     },
     {
       name: "username",
-      label: "Username",
+      label: t("formFields.username"),
       type: "text",
-      placeholder: "e.g sadik123",
+      placeholder: t("formFields.usernamePlaceholder"),
       id: "username",
       validation: fieldValidators.username,
     },
     {
       name: "email",
-      label: "Email",
+      label: t("formFields.email"),
       type: "email",
-      placeholder: "user@example.com",
+      placeholder: t("formFields.emailPlaceholder"),
       id: "email",
       validation: fieldValidators.email,
     },
     {
       name: "role",
-      label: "Role",
+      label: t("formFields.role"),
       type: "datalist",
       id: "role",
       options: ["admin", "teacher", "teacher_assistant"],
@@ -112,7 +117,7 @@ export const getAdminSignUpFormConfig = async (
     },
     {
       name: "joinedOn",
-      label: "Joined On",
+      label: t("formFields.joinedOn"),
       type: "date",
       id: "joined-on",
       defaultValue: new Date().toISOString().split("T")[0],
@@ -123,18 +128,18 @@ export const getAdminSignUpFormConfig = async (
   if (role === "teacher") {
     fields.push({
       name: "group",
-      label: "Group",
+      label: t("formFields.group"),
       type: "datalist",
       id: "group",
       options: groupOptions,
-      placeholder: "Select Group",
+      placeholder: t("formFields.groupPlaceholder"),
       validation: fieldValidators.group,
     });
   }
 
   fields.push({
     name: "profileImage",
-    label: "Profile Image",
+    label: t("formFields.profileImage"),
     type: "file",
     id: "profile-image",
     validation: fieldValidators.profileImage,

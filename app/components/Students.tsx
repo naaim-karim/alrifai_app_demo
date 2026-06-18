@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { capitalize, getAge } from "@/lib/utils";
 import { fetchStudents } from "@/services/studentsService";
 import { StudentData } from "@/types";
@@ -14,6 +15,7 @@ const Students = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const { user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const loadStudents = async () => {
@@ -57,53 +59,53 @@ const Students = () => {
   if (loading) {
     return (
       <main className="main-container flex-grow-1 py-8">
-        <h1 className="text-3xl font-bold mb-6">Students</h1>
-        <p className="text-center text-gray-500">Loading students...</p>
+        <h1 className="text-3xl font-bold mb-6">{t("students.title")}</h1>
+        <p className="text-center text-gray-500">{t("students.loading")}</p>
       </main>
     );
   }
 
   return (
     <main className="main-container flex-grow-1 py-8">
-      <h1 className="text-3xl font-bold mb-6">Students</h1>
+      <h1 className="text-3xl font-bold mb-6">{t("students.title")}</h1>
       <div className="relative mb-4">
-        <Search className="absolute top-1/2 left-3 transform -translate-y-1/2 text-secondary size-5" />
+        <Search className="absolute top-1/2 start-3 transform -translate-y-1/2 text-secondary size-5" />
         <input
           type="search"
-          className="input pl-10 placeholder:text-secondary bg-[#ededed]"
+          className="input ps-10 placeholder:text-secondary bg-[#ededed]"
           name="search"
           id="search"
-          placeholder="Search for students"
+          placeholder={t("students.searchPlaceholder")}
           value={searchTerm}
           onChange={handleSearchChange}
         />
       </div>
       {searchTerm && (
         <p className="text-sm text-gray-600 mb-4">
-          {filteredStudents.length} student
-          {filteredStudents.length !== 1 ? "s" : ""} found
+          {filteredStudents.length}{" "}
+          {filteredStudents.length !== 1
+            ? t("students.foundMany")
+            : t("students.foundOne")}
           {searchTerm && ` for "${searchTerm}"`}
         </p>
       )}
       {filteredStudents.length === 0 && !loading && (
         <p className="text-center text-gray-500">
-          {searchTerm
-            ? "No students found matching your search"
-            : "No students found"}
+          {searchTerm ? t("students.noMatch") : t("students.none")}
         </p>
       )}
       {filteredStudents.length > 0 && (
         <table className="table-auto w-full border border-gray-200 rounded-lg border-separate border-spacing-0">
           <thead>
             <tr>
-              <th className="px-4 py-2 text-left text-sm font-medium border-b-2 border-gray-200">
-                Name
+              <th className="px-4 py-2 text-start text-sm font-medium border-b-2 border-gray-200">
+                {t("students.name")}
               </th>
-              <th className="px-4 py-2 text-left text-sm font-medium border-b-2 border-gray-200">
-                Group
+              <th className="px-4 py-2 text-start text-sm font-medium border-b-2 border-gray-200">
+                {t("students.group")}
               </th>
-              <th className="px-4 py-2 text-left text-sm font-medium border-b-2 border-gray-200">
-                Age
+              <th className="px-4 py-2 text-start text-sm font-medium border-b-2 border-gray-200">
+                {t("students.age")}
               </th>
             </tr>
           </thead>

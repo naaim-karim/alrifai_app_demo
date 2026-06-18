@@ -5,6 +5,7 @@ import { capitalize } from "@/lib/utils";
 import { ScoreData } from "@/types";
 import { fetchAllScores } from "@/services/scoresService";
 import supabase from "@/lib/supabaseClient";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const rankStyles: Record<number, string> = {
   0: "bg-yellow-100 border-yellow-400",
@@ -21,6 +22,7 @@ const rankMedals: Record<number, string> = {
 const Scores = () => {
   const [scores, setScores] = useState<ScoreData[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const loadScores = async () => {
@@ -57,17 +59,21 @@ const Scores = () => {
   if (loading) {
     return (
       <main className="main-container flex-grow-1 py-8">
-        <h1 className="text-3xl font-bold mb-6 text-center">Leaderboard</h1>
-        <p className="text-center text-gray-500">Loading scores...</p>
+        <h1 className="text-3xl font-bold mb-6 text-center">
+          {t("scores.leaderboard")}
+        </h1>
+        <p className="text-center text-gray-500">{t("scores.loading")}</p>
       </main>
     );
   }
 
   return (
     <main className="main-container flex-grow-1 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">Leaderboard</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        {t("scores.leaderboard")}
+      </h1>
       {scores.length === 0 ? (
-        <p className="text-center text-gray-500">No scores yet</p>
+        <p className="text-center text-gray-500">{t("scores.none")}</p>
       ) : (
         <div className="flex flex-col gap-3 max-w-2xl mx-auto">
           {scores.map((student, index) => (

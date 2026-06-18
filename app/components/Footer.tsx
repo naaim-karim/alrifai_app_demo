@@ -1,7 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Footer = () => {
+  const { t } = useLanguage();
   return (
     <footer className="bg-primary text-white py-4 lg:py-2">
       <div className="main-container flex flex-col justify-center items-center gap-2 lg:flex-row lg:justify-between">
@@ -39,8 +43,10 @@ const Footer = () => {
           </a>
         </div> */}
         <p className="text-xs">
-          Copyright {new Date().getFullYear()} Alrifai Education. All rights
-          reserved.
+          {t("footer.copyright").replace(
+            "{year}",
+            String(new Date().getFullYear())
+          )}
         </p>
       </div>
     </footer>

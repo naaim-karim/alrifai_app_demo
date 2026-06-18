@@ -5,12 +5,15 @@ import Link from "next/link";
 import { CircleUser } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import Loading from "./Loading";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { Bars3BottomLeftIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { capitalize, getProfileRole } from "@/lib/utils";
 
 const MobileNavbar = () => {
   const { user, loading } = useAuth();
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
   if (loading) {
@@ -20,7 +23,7 @@ const MobileNavbar = () => {
   return (
     <nav className="main-container grid grid-cols-3 items-center md:hidden">
       <button
-        className="cursor-pointer mr-auto"
+        className="cursor-pointer me-auto"
         onClick={() => setIsOpen(true)}
       >
         <Bars3BottomLeftIcon className="size-8" />
@@ -34,7 +37,7 @@ const MobileNavbar = () => {
           <div className="mobile-nav">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-xl font-bold">
-                {user ? capitalize(user.user_metadata.fullname) : "Menu"}
+                {user ? capitalize(user.user_metadata.fullname) : t("common.menu")}
               </h2>
               <button
                 className="cursor-pointer"
@@ -45,13 +48,13 @@ const MobileNavbar = () => {
             </div>
             <ul className="flex flex-col gap-4">
               <li>
-                <Link href="/">Home</Link>
+                <Link href="/">{t("nav.home")}</Link>
               </li>
               <li>
-                <Link href="/contact">Contact</Link>
+                <Link href="/contact">{t("nav.contact")}</Link>
               </li>
               <li>
-                <Link href="/scores">Scores</Link>
+                <Link href="/scores">{t("nav.scores")}</Link>
               </li>
               {user && (
                 <li>
@@ -65,33 +68,36 @@ const MobileNavbar = () => {
                   >
                     {user.user_metadata.role === "admin" ||
                     user.user_metadata.role === "teacher_assistant"
-                      ? "Groups"
-                      : "Group"}
+                      ? t("nav.groups")
+                      : t("nav.group")}
                   </Link>
                 </li>
               )}
               {user && user.user_metadata.role === "admin" && (
                 <li>
-                  <Link href={`/students`}>Students</Link>
+                  <Link href={`/students`}>{t("nav.students")}</Link>
                 </li>
               )}
               {user && user.user_metadata.role === "teacher" && (
                 <li>
                   <Link href={`/scores/manage/${user.user_metadata.group}`}>
-                    Edit Scores
+                    {t("nav.editScores")}
                   </Link>
                 </li>
               )}
               {user && user.user_metadata.role === "admin" && (
                 <>
                   <li className="btn dark-btn">
-                    <Link href={`/new-user/admin`}>New Admin</Link>
+                    <Link href={`/new-user/admin`}>{t("nav.newAdmin")}</Link>
                   </li>
                   <li className="btn dark-btn">
-                    <Link href={`/new-user/student`}>New Student</Link>
+                    <Link href={`/new-user/student`}>{t("nav.newStudent")}</Link>
                   </li>
                 </>
               )}
+              <li>
+                <LanguageSwitcher />
+              </li>
             </ul>
           </div>
         </>
@@ -109,7 +115,7 @@ const MobileNavbar = () => {
           href={`/u/${getProfileRole(user.user_metadata.role)}/${
             user.user_metadata.username
           }`}
-          className="ml-auto"
+          className="ms-auto"
         >
           {user.user_metadata.profileImageUrl ? (
             <Image
@@ -124,8 +130,8 @@ const MobileNavbar = () => {
           )}
         </Link>
       ) : (
-        <Link href="/signin" className="btn dark-btn ml-auto">
-          Sign in
+        <Link href="/signin" className="btn dark-btn ms-auto">
+          {t("common.signIn")}
         </Link>
       )}
     </nav>

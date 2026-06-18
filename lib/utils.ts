@@ -1,24 +1,24 @@
-export const getFriendlyErrorMessage = (error: Error) => {
+export const getFriendlyErrorMessage = (
+  error: Error,
+  t: (key: string) => string
+) => {
   const errorMap: { [key: string]: string } = {
-    "Signups not allowed for otp":
-      "We couldn't find an account with that email address.",
-    "Invalid credentials": "Please check your email address and try again.",
-    "Rate limit exceeded":
-      "Too many attempts. Please wait a moment and try again.",
-    "Signups not allowed for this instance":
-      "Sign-ups are currently disabled. Please contact support or try again later.",
+    "Signups not allowed for otp": t("errors.accountNotFound"),
+    "Invalid credentials": t("errors.invalidCredentials"),
+    "Rate limit exceeded": t("errors.rateLimitExceeded"),
+    "Signups not allowed for this instance": t("errors.signupsDisabled"),
     'duplicate key value violates unique constraint "groups_group_name_key"':
-      "Group name already exists. Please choose a different group name.",
+      t("errors.groupNameTaken"),
   };
 
-  return errorMap[error.message] || "Something went wrong. Please try again.";
+  return errorMap[error.message] || t("errors.generic");
 };
 
 export const capitalize = (str: string) => {
-  const result = str
+  return str
     .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1) + " ");
-  return result;
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 };
 
 export const getProfileRole = (role?: string) => {

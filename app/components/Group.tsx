@@ -2,6 +2,7 @@
 
 import { notFound, redirect } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { capitalize } from "@/lib/utils";
 import Loading from "./Loading";
 import { fetchGroupMembers } from "@/services/groupService";
@@ -14,6 +15,7 @@ import { LessonContentsData } from "@/types";
 
 const Group = ({ groupName }: { groupName: string }) => {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
   const [groupMembers, setGroupMembers] = useState<string[]>([]);
   const [lessonContents, setLessonContents] = useState<LessonContentsData[]>(
     []
@@ -48,7 +50,7 @@ const Group = ({ groupName }: { groupName: string }) => {
   if (loading) {
     return (
       <main className="main-container flex-grow-1 py-8">
-        <p className="text-center text-gray-500">Loading group...</p>
+        <p className="text-center text-gray-500">{t("group.loading")}</p>
       </main>
     );
   }
@@ -71,15 +73,15 @@ const Group = ({ groupName }: { groupName: string }) => {
         </div>
       </section>
       <section>
-        <h2 className="text-3xl font-bold mb-6">Lessons</h2>
+        <h2 className="text-3xl font-bold mb-6">{t("group.lessons")}</h2>
         <table className="table-auto w-full border border-gray-200 rounded-lg border-separate border-spacing-0">
           <thead>
             <tr>
-              <th className="px-4 py-2 text-left text-sm font-medium border-b-2 border-gray-200">
-                Subject
+              <th className="px-4 py-2 text-start text-sm font-medium border-b-2 border-gray-200">
+                {t("group.subject")}
               </th>
-              <th className="px-4 py-2 text-left text-sm font-medium border-b-2 border-gray-200">
-                Textbook
+              <th className="px-4 py-2 text-start text-sm font-medium border-b-2 border-gray-200">
+                {t("group.textbook")}
               </th>
             </tr>
           </thead>

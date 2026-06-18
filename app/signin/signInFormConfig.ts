@@ -1,13 +1,14 @@
-import { fieldValidators } from "@/lib/validations";
+import { getFieldValidators } from "@/lib/validations";
 import { FormField } from "@/types";
 
-export const getSignInFormConfig = (): FormField[] => {
+export const getSignInFormConfig = (t: (key: string) => string): FormField[] => {
+  const fieldValidators = getFieldValidators(t);
   return [
     {
       name: "email",
-      label: "Email",
+      label: t("formFields.email"),
       type: "email",
-      placeholder: "user@example.com",
+      placeholder: t("formFields.emailPlaceholder"),
       id: "email",
       autoFocus: true,
       validation: fieldValidators.email,
