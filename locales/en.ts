@@ -141,7 +141,6 @@ const en = {
   },
   addScorePopup: {
     title: "Add Student",
-    fullNamePlaceholder: "Full Name",
     cancel: "Cancel",
     add: "Add",
     successToast: "Student added successfully!",
@@ -160,8 +159,10 @@ const en = {
     goHome: "Go to Home",
   },
   formFields: {
-    fullname: "Full Name",
-    fullnamePlaceholder: "e.g Mohammad Sadik",
+    firstName: "First Name",
+    firstNamePlaceholder: "e.g Mohammad",
+    lastName: "Last Name",
+    lastNamePlaceholder: "e.g Sadik",
     username: "Username",
     usernamePlaceholder: "e.g sadik123",
     dateOfBirth: "Date of birth",
@@ -178,7 +179,6 @@ const en = {
     required: "{field} is required",
     minLength: "{field} must be at least {min} characters",
     fullnameLetters: "Full name can only contain letters and spaces",
-    fullnameWords: "Full name must be at least 2 words",
     emailInvalid: "Please enter a valid email address",
     usernameChars: "Username can only contain letters, numbers, and underscores",
     usernameTaken: "Username is already taken",

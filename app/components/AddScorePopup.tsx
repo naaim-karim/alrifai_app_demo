@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { getFieldValidators } from "@/lib/validations";
+import { getFieldValidators, getValidations } from "@/lib/validations";
 import { insertScore } from "@/services/scoresService";
 import { getFriendlyErrorMessage } from "@/lib/utils";
 import { ScoreData } from "@/types";
@@ -16,25 +16,49 @@ const AddScorePopup = ({
   onAdded: (student: ScoreData) => void;
 }) => {
   const { t } = useLanguage();
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAddStudent = useCallback(async () => {
     setIsSubmitting(true);
-    const error = await getFieldValidators(t).scoreName(name);
+    const validations = getValidations(t);
+
+    const firstNameError =
+      (await validations.required(t("formFields.firstName"))(firstName)) ||
+      (await validations.fullname(firstName));
+    const lastNameError =
+      (await validations.required(t("formFields.lastName"))(lastName)) ||
+      (await validations.fullname(lastName));
+    if (firstNameError || lastNameError) {
+      toast.error(firstNameError || lastNameError, { duration: 5000 });
+      setIsSubmitting(false);
+      return;
+    }
+
+    const combinedName = `${firstName.replace(/\s+/g, "")} ${lastName.replace(
+      /\s+/g,
+      ""
+    )}`;
+
+    const error = await getFieldValidators(t).scoreName(combinedName);
     if (error) {
       toast.error(error, { duration: 5000 });
       setIsSubmitting(false);
       return;
     }
     try {
-      const { error } = await insertScore(name.trim(), groupName);
+      const { error } = await insertScore(combinedName, groupName);
 
       if (error) {
         toast.error(getFriendlyErrorMessage(error, t), { duration: 5000 });
       } else {
         toast.success(t("addScorePopup.successToast"), { duration: 5000 });
-        onAdded({ name: name.trim().toLowerCase(), score: 0, group: groupName });
+        onAdded({
+          name: combinedName.toLowerCase(),
+          score: 0,
+          group: groupName,
+        });
         setShowAddPopup(false);
       }
     } catch {
@@ -42,7 +66,7 @@ const AddScorePopup = ({
     } finally {
       setIsSubmitting(false);
     }
-  }, [name, groupName, setShowAddPopup, onAdded, t]);
+  }, [firstName, lastName, groupName, setShowAddPopup, onAdded, t]);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -78,11 +102,20 @@ const AddScorePopup = ({
         <div className="space-y-4">
           <input
             type="text"
-            placeholder={t("addScorePopup.fullNamePlaceholder")}
+            placeholder={t("formFields.firstName")}
             className="input w-full"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
             autoFocus
+            required
+            disabled={isSubmitting}
+          />
+          <input
+            type="text"
+            placeholder={t("formFields.lastName")}
+            className="input w-full"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
             required
             disabled={isSubmitting}
           />

@@ -11,8 +11,19 @@ export const signUpNewAdminAction = async (
   const locale = ((await cookies()).get("locale")?.value as Locale) || "en";
   const fieldValidators = getFieldValidators(getTranslator(locale));
 
+  const firstName = formData.get("firstName")?.toString() || "";
+  const lastName = formData.get("lastName")?.toString() || "";
+
+  const { isValid: isNameValid, errors: nameErrors } = await validateFormData(
+    { firstName, lastName },
+    { firstName: fieldValidators.firstName, lastName: fieldValidators.lastName }
+  );
+
   const data: SignUpUserData = {
-    fullname: formData.get("fullname")?.toString() || "",
+    fullname: `${firstName.replace(/\s+/g, "")} ${lastName.replace(
+      /\s+/g,
+      ""
+    )}`,
     username: formData.get("username")?.toString() || "",
     email: formData.get("email")?.toString() || "",
     joinedOn: formData.get("joinedOn")?.toString() || "",
@@ -22,7 +33,6 @@ export const signUpNewAdminAction = async (
   };
 
   const { isValid, errors } = await validateFormData(data, {
-    fullname: fieldValidators.fullname,
     username: fieldValidators.username,
     email: fieldValidators.email,
     joinedOn: fieldValidators.joinedOn,
@@ -30,10 +40,10 @@ export const signUpNewAdminAction = async (
     role: fieldValidators.role,
   });
 
-  if (!isValid) {
+  if (!isNameValid || !isValid) {
     return {
       success: false,
-      errors,
+      errors: { ...nameErrors, ...errors },
     };
   }
 
