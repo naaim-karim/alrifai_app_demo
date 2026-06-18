@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { fieldValidators } from "@/lib/validations";
+import { getFieldValidators } from "@/lib/validations";
 import { insertScore } from "@/services/scoresService";
 import { getFriendlyErrorMessage } from "@/lib/utils";
 import { ScoreData } from "@/types";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const AddScorePopup = ({
   groupName,
@@ -14,12 +15,13 @@ const AddScorePopup = ({
   setShowAddPopup: (value: boolean) => void;
   onAdded: (student: ScoreData) => void;
 }) => {
+  const { t } = useLanguage();
   const [name, setName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAddStudent = useCallback(async () => {
     setIsSubmitting(true);
-    const error = await fieldValidators.scoreName(name);
+    const error = await getFieldValidators(t).scoreName(name);
     if (error) {
       toast.error(error, { duration: 5000 });
       setIsSubmitting(false);
@@ -29,18 +31,18 @@ const AddScorePopup = ({
       const { error } = await insertScore(name.trim(), groupName);
 
       if (error) {
-        toast.error(getFriendlyErrorMessage(error), { duration: 5000 });
+        toast.error(getFriendlyErrorMessage(error, t), { duration: 5000 });
       } else {
-        toast.success("Student added successfully!", { duration: 5000 });
+        toast.success(t("addScorePopup.successToast"), { duration: 5000 });
         onAdded({ name: name.trim().toLowerCase(), score: 0, group: groupName });
         setShowAddPopup(false);
       }
     } catch {
-      toast.error("Unexpected error. Please try again.", { duration: 5000 });
+      toast.error(t("addScorePopup.unexpectedError"), { duration: 5000 });
     } finally {
       setIsSubmitting(false);
     }
-  }, [name, groupName, setShowAddPopup, onAdded]);
+  }, [name, groupName, setShowAddPopup, onAdded, t]);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -72,11 +74,11 @@ const AddScorePopup = ({
         onSubmit={handleSubmit}
         className="bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-xl"
       >
-        <h2 className="text-xl font-bold mb-4">Add Student</h2>
+        <h2 className="text-xl font-bold mb-4">{t("addScorePopup.title")}</h2>
         <div className="space-y-4">
           <input
             type="text"
-            placeholder="Full Name"
+            placeholder={t("addScorePopup.fullNamePlaceholder")}
             className="input w-full"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -92,10 +94,10 @@ const AddScorePopup = ({
             onClick={() => setShowAddPopup(false)}
             disabled={isSubmitting}
           >
-            Cancel
+            {t("addScorePopup.cancel")}
           </button>
           <button type="submit" className="btn dark-btn" disabled={isSubmitting}>
-            Add
+            {t("addScorePopup.add")}
           </button>
         </div>
       </form>

@@ -1,6 +1,7 @@
 import { ImageUploadInputProps } from "@/types";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const ImageUploadInput = ({
   name,
@@ -13,6 +14,7 @@ const ImageUploadInput = ({
   onBlur,
   elementRef,
 }: ImageUploadInputProps) => {
+  const { t } = useLanguage();
   const [preview, setPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [imageDimensions, setImageDimensions] = useState<{
@@ -138,7 +140,7 @@ const ImageUploadInput = ({
               className="px-4 py-2 text-sm text-red-600 hover:text-red-800 font-medium cursor-pointer"
               disabled={disabled}
             >
-              Remove Image
+              {t("imageUpload.removeImage")}
             </button>
           </div>
         ) : (
@@ -161,11 +163,11 @@ const ImageUploadInput = ({
             <div>
               <p className="text-gray-600">
                 <span className="font-medium text-blue-600 hover:text-blue-500">
-                  Click to upload
-                </span>{" "}
-                or drag and drop
+                  {t("imageUpload.clickToUpload")}
+                </span>
+                {t("imageUpload.orDragDrop")}
               </p>
-              <p className="text-sm text-gray-500">PNG, JPG, WebP up to 5MB</p>
+              <p className="text-sm text-gray-500">{t("imageUpload.fileHint")}</p>
             </div>
           </div>
         )}

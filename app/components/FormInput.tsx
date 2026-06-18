@@ -1,6 +1,7 @@
 import { capitalize } from "@/lib/utils";
 import { FormInputProps } from "@/types";
 import { usePathname } from "next/navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const FormInput = ({
   field,
@@ -13,6 +14,7 @@ const FormInput = ({
 }: FormInputProps) => {
   const pathname = usePathname();
   const isAdmin = pathname.includes("admin");
+  const { t } = useLanguage();
 
   return (
     <div className="mb-4 flex flex-col relative">
@@ -38,7 +40,7 @@ const FormInput = ({
           {isAdmin && field.name === "role" ? (
             <>
               <option value="" hidden>
-                Select Role
+                {t("formInput.selectRole")}
               </option>
               {field.options?.map((option) => (
                 <option key={option} value={option}>
@@ -49,7 +51,7 @@ const FormInput = ({
           ) : (
             <>
               <option value="" hidden>
-                Select Group
+                {t("formInput.selectGroup")}
               </option>
               {field.options?.map((option) => (
                 <option key={option} value={option}>

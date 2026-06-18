@@ -13,6 +13,7 @@ import ImageUploadInput from "./ImageUploadInput";
 import { CookingPot, Send } from "lucide-react";
 import { notFound, redirect, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import Loading from "./Loading";
 
 const SignUpForm = () => {
@@ -21,6 +22,7 @@ const SignUpForm = () => {
   const [serverError, setServerError] = useState<string | null>(null);
   const pathname = usePathname();
   const { user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
 
   const {
     values,
@@ -37,8 +39,8 @@ const SignUpForm = () => {
     const loadFormConfig = async () => {
       try {
         const signUpFormConfig = pathname.includes("admin")
-          ? await getAdminSignUpFormConfig(values.role as string | undefined)
-          : await getStudentSignUpFormConfig();
+          ? await getAdminSignUpFormConfig(t, values.role as string | undefined)
+          : await getStudentSignUpFormConfig(t);
         setSignUpFormConfig(signUpFormConfig);
       } catch {
         setSignUpFormConfig([]);
@@ -48,7 +50,7 @@ const SignUpForm = () => {
     };
 
     loadFormConfig();
-  }, [pathname, values.role]);
+  }, [pathname, values.role, t]);
   const { error, submitAction, isPending } = useSignUpMagicLink(resetForm);
   useEffect(() => {
     if (error) {
@@ -82,7 +84,9 @@ const SignUpForm = () => {
   return (
     <main className="main-container flex-grow-1 py-16">
       <h1 className="text-xl text-center mb-8 font-bold md:text-3xl">
-        Sign Up New {pathname.includes("admin") ? "Admin/Teacher" : "Student"}
+        {pathname.includes("admin")
+          ? t("signup.titleAdmin")
+          : t("signup.titleStudent")}
       </h1>
       <Form
         action={handleSubmit}
@@ -92,9 +96,7 @@ const SignUpForm = () => {
         aria-describedby="form-description"
       >
         <p className="sr-only" id="form-description">
-          {
-            "Enter your details to create a new account and we'll send you a secure sign-in link."
-          }
+          {t("signup.formDescription")}
         </p>
 
         {signUpFormConfig.map((field) =>
@@ -133,8 +135,8 @@ const SignUpForm = () => {
             setServerError(null);
           }}
         >
-          Reset Form
-          <CookingPot className="ml-2 size-5" />
+          {t("signup.resetForm")}
+          <CookingPot className="ms-2 size-5" />
         </button>
 
         {serverError && (
@@ -143,8 +145,7 @@ const SignUpForm = () => {
             className="text-red-500 text-sm p-1 text-center"
             role="alert"
           >
-            {serverError ||
-              "An error occurred while signing up. Please try again."}
+            {serverError || t("signup.errorFallback")}
           </p>
         )}
         <button
@@ -153,14 +154,14 @@ const SignUpForm = () => {
           disabled={isPending}
           aria-busy={isPending}
         >
-          {isPending ? "Signing up..." : "Sign Up New User"}
-          <Send className="ml-2 size-5" />
+          {isPending ? t("signup.signingUp") : t("signup.signUp")}
+          <Send className="ms-2 size-5" />
         </button>
       </Form>
       <p className="text-gray-500 text-center mt-4">
-        {"Having trouble signing in? "}
+        {t("signup.troubleSigningIn")}
         <Link href="/contact" className="text-primary font-semibold">
-          Get Help
+          {t("signup.getHelp")}
         </Link>
       </p>
     </main>

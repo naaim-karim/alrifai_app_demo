@@ -6,6 +6,7 @@ import { User } from "@supabase/supabase-js";
 import { getFriendlyErrorMessage } from "@/lib/utils";
 import type { AuthContextType, SignInUserData, SignUpUserData } from "@/types";
 import { uploadProfileImage } from "@/services/storageService";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -14,6 +15,7 @@ export const AuthProvider = ({
 }: Readonly<{ children: React.ReactNode }>) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   const doesEmailExist = async (email: string) => {
     const emailLower = email.toLowerCase();
@@ -44,7 +46,7 @@ export const AuthProvider = ({
     ) {
       return {
         success: false,
-        error: "An account with this email already exists.",
+        error: t("auth.emailExists"),
       };
     }
 
@@ -62,13 +64,13 @@ export const AuthProvider = ({
       });
 
       if (error) {
-        return { success: false, error: getFriendlyErrorMessage(error) };
+        return { success: false, error: getFriendlyErrorMessage(error, t) };
       }
       return { success: true };
     } catch {
       return {
         success: false,
-        error: "An unexpected error occurred. Please try again later.",
+        error: t("auth.unexpectedError"),
       };
     }
   };
@@ -88,7 +90,7 @@ export const AuthProvider = ({
       if (userData.profileImage && userData.profileImage.size > 0) {
         profileImageUrl = await uploadProfileImage(userData.profileImage);
         if (!profileImageUrl) {
-          return { success: false, error: "Failed to upload profile image" };
+          return { success: false, error: t("auth.uploadFailed") };
         }
       }
 
@@ -110,13 +112,13 @@ export const AuthProvider = ({
       });
 
       if (error) {
-        return { success: false, error: error.message };
+        return { success: false, error: getFriendlyErrorMessage(error, t) };
       }
       return { success: true };
     } catch {
       return {
         success: false,
-        error: "An unexpected error occurred. Please try again later.",
+        error: t("auth.unexpectedError"),
       };
     }
   };
@@ -125,13 +127,13 @@ export const AuthProvider = ({
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
-        return { success: false, error: getFriendlyErrorMessage(error) };
+        return { success: false, error: getFriendlyErrorMessage(error, t) };
       }
       return { success: true };
     } catch {
       return {
         success: false,
-        error: "An unexpected error occurred. Please try again later.",
+        error: t("auth.unexpectedError"),
       };
     }
   };

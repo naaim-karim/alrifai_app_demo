@@ -5,6 +5,14 @@
   --color-secondary: #6b7a75;
 }
 
+body {
+  font-family: var(--font-inter);
+}
+
+[dir="rtl"] body {
+  font-family: var(--font-arabic);
+}
+
 @layer components {
   .main-container {
     @apply container mx-auto px-4;
@@ -41,6 +49,10 @@
   animation: slideIn 0.3s;
 }
 
+[dir="rtl"] .mobile-nav {
+  animation: slideInRtl 0.3s;
+}
+
 .arrow-rotated {
   transform: rotateZ(-180deg);
 }
@@ -62,6 +74,15 @@
 @keyframes slideIn {
   from {
     transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRtl {
+  from {
+    transform: translateX(100%);
   }
   to {
     transform: translateX(0);

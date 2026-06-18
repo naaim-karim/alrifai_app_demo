@@ -1,11 +1,16 @@
 "use server";
 
-import { fieldValidators, validateFormData } from "@/lib/validations";
+import { cookies } from "next/headers";
+import { getTranslator, type Locale } from "@/locales";
+import { getFieldValidators, validateFormData } from "@/lib/validations";
 import { SignInUserData, SignInResult } from "@/types";
 
 export const signInUserAction = async (
   formData: FormData
 ): Promise<SignInResult> => {
+  const locale = ((await cookies()).get("locale")?.value as Locale) || "en";
+  const fieldValidators = getFieldValidators(getTranslator(locale));
+
   const data: SignInUserData = {
     email: formData.get("email")?.toString() || "",
   };

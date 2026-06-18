@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { notFound, redirect } from "next/navigation";
 import { capitalize } from "@/lib/utils";
 import { LogOut } from "lucide-react";
@@ -11,6 +12,7 @@ import { useState } from "react";
 
 const UserProfile = ({ username }: { username: string }) => {
   const { user, loading, signOut } = useAuth();
+  const { t } = useLanguage();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
@@ -23,9 +25,7 @@ const UserProfile = ({ username }: { username: string }) => {
     } catch (error) {
       setIsSigningOut(false);
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred. Please try again later.";
+        error instanceof Error ? error.message : t("userProfile.unexpectedError");
       toast.error(errorMessage);
     }
   };
@@ -56,15 +56,16 @@ const UserProfile = ({ username }: { username: string }) => {
           @{user?.user_metadata.username}
         </span>
         <span className="text-sm text-gray-500">
-          Joined {user?.user_metadata.joinedOn.replaceAll("-", "/")}
+          {t("userProfile.joined")}{" "}
+          {user?.user_metadata.joinedOn.replaceAll("-", "/")}
         </span>
         <span className="text-sm text-gray-500">
-          Group {user?.user_metadata.group}
+          {t("userProfile.group")} {user?.user_metadata.group}
         </span>
       </section>
       {/* Enrolled Groups */}
       <section className="py-8">
-        <h1 className="font-bold mb-4">Enrolled Groups</h1>
+        <h1 className="font-bold mb-4">{t("userProfile.enrolledGroups")}</h1>
         <div className="flex gap-4">
           <span className="bg-gray-200 py-1.5 px-3 rounded-xl">
             {user.user_metadata.group}
@@ -78,8 +79,8 @@ const UserProfile = ({ username }: { username: string }) => {
           className="btn bg-gray-200 text-primary w-full flex justify-center items-center"
           disabled={isSigningOut}
         >
-          {isSigningOut ? "Signing Out..." : "Sign Out"}
-          <LogOut className="ml-2 size-5" />
+          {isSigningOut ? t("userProfile.signingOut") : t("userProfile.signOut")}
+          <LogOut className="ms-2 size-5" />
         </button>
       </section>
     </main>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { capitalize } from "@/lib/utils";
 import { GroupData } from "@/types";
 import { Search } from "lucide-react";
@@ -19,6 +20,7 @@ const Groups = () => {
   const [loading, setLoading] = useState(true);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
   const { user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const loadGroups = async () => {
@@ -94,39 +96,39 @@ const Groups = () => {
   if (loading) {
     return (
       <main className="main-container flex-grow-1 py-8">
-        <h1 className="text-3xl font-bold mb-6">Groups</h1>
-        <p className="text-center text-gray-500">Loading groups...</p>
+        <h1 className="text-3xl font-bold mb-6">{t("groups.title")}</h1>
+        <p className="text-center text-gray-500">{t("groups.loading")}</p>
       </main>
     );
   }
 
   return (
     <main className="main-container flex-grow-1 py-8">
-      <h1 className="text-3xl font-bold mb-6">Groups</h1>
+      <h1 className="text-3xl font-bold mb-6">{t("groups.title")}</h1>
       <div className="relative mb-4">
-        <Search className="absolute top-1/2 left-3 transform -translate-y-1/2 text-secondary size-5" />
+        <Search className="absolute top-1/2 start-3 transform -translate-y-1/2 text-secondary size-5" />
         <input
           type="search"
-          className="input pl-10 placeholder:text-secondary bg-[#ededed]"
+          className="input ps-10 placeholder:text-secondary bg-[#ededed]"
           name="search"
           id="search"
-          placeholder="Search for groups"
+          placeholder={t("groups.searchPlaceholder")}
           value={searchTerm}
           onChange={handleSearchChange}
         />
       </div>
       {searchTerm && (
         <p className="text-sm text-gray-600 mb-4">
-          {filteredGroups.length} group
-          {filteredGroups.length !== 1 ? "s" : ""} found
+          {filteredGroups.length}{" "}
+          {filteredGroups.length !== 1
+            ? t("groups.foundMany")
+            : t("groups.foundOne")}
           {searchTerm && ` for "${searchTerm}"`}
         </p>
       )}
       {filteredGroups.length === 0 && !loading && (
         <p className="text-center text-gray-500">
-          {searchTerm
-            ? "No groups found matching your search"
-            : "No groups found"}
+          {searchTerm ? t("groups.noMatch") : t("groups.none")}
         </p>
       )}
       {filteredGroups.length > 0 && (
@@ -145,10 +147,10 @@ const Groups = () => {
                 className="max-w-full h-auto mb-4"
               />
               <div className="flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-right">
+                <h2 className="text-lg font-semibold text-end">
                   {capitalize(group.group_name || "")}
                 </h2>
-                <span>{group.closed ? "Closed" : "Open"}</span>
+                <span>{group.closed ? t("groups.closed") : t("groups.open")}</span>
               </div>
             </Link>
           ))}
@@ -156,10 +158,10 @@ const Groups = () => {
       )}
       {isAdmin && (
         <button
-          className="btn dark-btn mt-8 block mx-auto lg:ml-auto lg:mx-0"
+          className="btn dark-btn mt-8 block mx-auto lg:ms-auto lg:mx-0"
           onClick={() => setShowCreatePopup(true)}
         >
-          Create New Group
+          {t("groups.createNew")}
         </button>
       )}
       {isAdmin && showCreatePopup && (

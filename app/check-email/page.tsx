@@ -1,12 +1,14 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import Image from "next/image";
 import Link from "next/link";
 import Loading from "@/app/components/Loading";
 
 const CheckEmailPage = () => {
   const { loading } = useAuth();
+  const { t } = useLanguage();
 
   if (loading) {
     return <Loading />;
@@ -47,25 +49,21 @@ const CheckEmailPage = () => {
             </svg>
           </div>
           <h1 className="text-xl font-bold mb-4 md:text-2xl">
-            Check Your Email
+            {t("checkEmail.title")}
           </h1>
-          <p className="text-gray-600 mb-4">
-            {
-              "We've sent you a sign-in link. Please click the link in the email to sign in to your account."
-            }
-          </p>
+          <p className="text-gray-600 mb-4">{t("checkEmail.body")}</p>
           <a
             href="https://mail.google.com/mail/u/0/#inbox"
             target="_blank"
             rel="noopener noreferrer"
             className="btn dark-btn mb-4"
           >
-            Open My Inbox
+            {t("checkEmail.openInbox")}
           </a>
           <p className="text-sm text-gray-500">
-            {"Didn't receive the email? Check your spam folder or "}
+            {t("checkEmail.noEmail")}
             <Link href="/contact" className="text-primary font-semibold">
-              contact support
+              {t("checkEmail.contactSupport")}
             </Link>
           </p>
         </div>

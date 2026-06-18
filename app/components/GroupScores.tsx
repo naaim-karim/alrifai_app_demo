@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { notFound, redirect } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { capitalize, getFriendlyErrorMessage } from "@/lib/utils";
 import { ScoreData } from "@/types";
 import {
@@ -17,6 +18,7 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 
 const GroupScores = ({ groupName }: { groupName: string }) => {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
   const [students, setStudents] = useState<ScoreData[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddPopup, setShowAddPopup] = useState(false);
@@ -59,7 +61,7 @@ const GroupScores = ({ groupName }: { groupName: string }) => {
     const { error } = await updateScore(name, safeScore);
 
     if (error) {
-      toast.error(getFriendlyErrorMessage(error), { duration: 5000 });
+      toast.error(getFriendlyErrorMessage(error, t), { duration: 5000 });
       return;
     }
 
@@ -71,18 +73,22 @@ const GroupScores = ({ groupName }: { groupName: string }) => {
   };
 
   const handleDelete = async (name: string) => {
-    if (!window.confirm(`Remove ${capitalize(name)} from the score list?`)) {
+    if (
+      !window.confirm(
+        t("groupScores.removeConfirm").replace("{name}", capitalize(name))
+      )
+    ) {
       return;
     }
 
     const { error } = await deleteScore(name);
 
     if (error) {
-      toast.error(getFriendlyErrorMessage(error), { duration: 5000 });
+      toast.error(getFriendlyErrorMessage(error, t), { duration: 5000 });
       return;
     }
 
-    toast.success("Student removed", { duration: 5000 });
+    toast.success(t("groupScores.removedToast"), { duration: 5000 });
     setStudents((prev) => prev.filter((student) => student.name !== name));
   };
 
@@ -103,7 +109,7 @@ const GroupScores = ({ groupName }: { groupName: string }) => {
   if (loading) {
     return (
       <main className="main-container flex-grow-1 py-8">
-        <p className="text-center text-gray-500">Loading students...</p>
+        <p className="text-center text-gray-500">{t("groupScores.loading")}</p>
       </main>
     );
   }
@@ -111,10 +117,10 @@ const GroupScores = ({ groupName }: { groupName: string }) => {
   return (
     <main className="main-container flex-grow-1 py-8">
       <h1 className="text-3xl font-bold mb-6 text-center">
-        {capitalize(groupName)} Scores
+        {capitalize(groupName)} {t("groupScores.scoresSuffix")}
       </h1>
       {students.length === 0 ? (
-        <p className="text-center text-gray-500 mb-8">No students yet</p>
+        <p className="text-center text-gray-500 mb-8">{t("groupScores.none")}</p>
       ) : (
         <div className="flex flex-col gap-3 max-w-2xl mx-auto mb-8">
           {students.map((student) => (
@@ -185,7 +191,7 @@ const GroupScores = ({ groupName }: { groupName: string }) => {
           className="btn dark-btn block mx-auto"
           onClick={() => setShowAddPopup(true)}
         >
-          Add Student
+          {t("groupScores.addStudent")}
         </button>
       )}
       {canManageStudents && showAddPopup && (
