@@ -5,6 +5,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { Toaster } from "react-hot-toast";
+import InstallPrompt from "@/app/components/InstallPrompt";
 import type { Locale } from "@/locales";
 
 const inter = Inter({
@@ -55,6 +56,7 @@ const RootLayout = async ({
       >
         <LanguageProvider initialLocale={locale}>
           <AuthProvider>{children}</AuthProvider>
+          <InstallPrompt />
         </LanguageProvider>
         <Toaster />
       </body>

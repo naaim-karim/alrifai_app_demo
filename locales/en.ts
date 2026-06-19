@@ -204,6 +204,13 @@ const en = {
     groupNameTaken: "Group name already exists. Please choose a different group name.",
     generic: "Something went wrong. Please try again.",
   },
+  installPrompt: {
+    title: "Install Alrifai App",
+    body: "Add it to your home screen for quick, full-screen access.",
+    install: "Install",
+    dismiss: "Not now",
+    iosInstructions: "Tap the Share button, then 'Add to Home Screen'.",
+  },
 };
 
 export default en;
