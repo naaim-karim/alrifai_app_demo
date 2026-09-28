@@ -78,7 +78,7 @@ export const AuthProvider = ({
   const signUpWithMagicLink = async (userData: SignUpUserData) => {
     try {
       const { success: doesntExist, error: emailError } = await doesEmailExist(
-        userData.email.toLowerCase()
+        userData.email.toLowerCase(),
       );
 
       if (!doesntExist) {
@@ -149,8 +149,11 @@ export const AuthProvider = ({
           throw error;
         }
         setUser(session?.user ?? null);
+      } catch {
+        setUser(null);
+      } finally {
         setLoading(false);
-      } catch {}
+      }
     };
     getInitialSession();
 

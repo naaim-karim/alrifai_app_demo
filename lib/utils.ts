@@ -1,14 +1,15 @@
 export const getFriendlyErrorMessage = (
   error: Error,
-  t: (key: string) => string
+  t: (key: string) => string,
 ) => {
   const errorMap: { [key: string]: string } = {
     "Signups not allowed for otp": t("errors.accountNotFound"),
     "Invalid credentials": t("errors.invalidCredentials"),
     "Rate limit exceeded": t("errors.rateLimitExceeded"),
     "Signups not allowed for this instance": t("errors.signupsDisabled"),
-    'duplicate key value violates unique constraint "groups_group_name_key"':
-      t("errors.groupNameTaken"),
+    'duplicate key value violates unique constraint "groups_group_name_key"': t(
+      "errors.groupNameTaken",
+    ),
   };
 
   return errorMap[error.message] || t("errors.generic");
@@ -29,6 +30,8 @@ export const getProfileRole = (role?: string) => {
 export const getAge = (dateOfBirth: string) => {
   const today = new Date();
   const birthDate = new Date(dateOfBirth);
+  if (!dateOfBirth || Number.isNaN(birthDate.getTime()) || birthDate > today)
+    return null;
   let age = today.getFullYear() - birthDate.getFullYear();
   const month = today.getMonth() - birthDate.getMonth();
   if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {

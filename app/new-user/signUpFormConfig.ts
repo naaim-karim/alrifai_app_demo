@@ -3,10 +3,12 @@ import { fetchGroups } from "@/services/groupService";
 import type { FormField } from "@/types";
 
 export const getStudentSignUpFormConfig = async (
-  t: (key: string) => string
+  t: (key: string) => string,
 ): Promise<FormField[]> => {
   const fieldValidators = getFieldValidators(t);
   const groups = await fetchGroups();
+  if (groups.some((group) => group.error))
+    throw new Error("Could not load groups");
   const groupOptions = groups
     .map((group) => group.group_name)
     .filter((name): name is string => name !== undefined);
@@ -81,10 +83,12 @@ export const getStudentSignUpFormConfig = async (
 
 export const getAdminSignUpFormConfig = async (
   t: (key: string) => string,
-  role?: string
+  role?: string,
 ): Promise<FormField[]> => {
   const fieldValidators = getFieldValidators(t);
   const groups = await fetchGroups();
+  if (groups.some((group) => group.error))
+    throw new Error("Could not load groups");
   const groupOptions = groups
     .map((group) => group.group_name)
     .filter((name): name is string => name !== undefined);

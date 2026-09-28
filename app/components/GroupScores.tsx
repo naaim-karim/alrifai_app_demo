@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { notFound, redirect } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { capitalize, getFriendlyErrorMessage } from "@/lib/utils";
+import { capitalize } from "@/lib/utils";
+import { useAsyncList } from "@/app/hooks/useAsyncList";
+import LoadError from "./LoadError";
 import { ScoreData } from "@/types";
 import {
   fetchGroupScores,
@@ -19,8 +21,6 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 const GroupScores = ({ groupName }: { groupName: string }) => {
   const { user, loading: authLoading } = useAuth();
   const { t } = useLanguage();
-  const [students, setStudents] = useState<ScoreData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [editingName, setEditingName] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState("");
@@ -33,21 +33,29 @@ const GroupScores = ({ groupName }: { groupName: string }) => {
   const canView = isAdmin || isOwningTeacher || isTeacherAssistant;
   const canManageStudents = isAdmin || isOwningTeacher;
 
-  useEffect(() => {
-    if (!canView) return;
-
-    const loadStudents = async () => {
-      try {
-        const data = await fetchGroupScores(groupName);
-        setStudents(data.filter((student) => !student.error));
-      } catch {
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadStudents();
-  }, [groupName, canView]);
+  const fetchStudents = useCallback(
+    () => fetchGroupScores(groupName),
+    [groupName],
+  );
+  const {
+    data: students,
+    setData: setStudents,
+    loading,
+    failed,
+    reload,
+  } = useAsyncList(fetchStudents, canView);
+  const pendingRef = useRef(new Set<string>());
+  const [pending, setPending] = useState(new Set<string>());
+  const lockRow = (name: string) => {
+    if (pendingRef.current.has(name)) return false;
+    pendingRef.current.add(name);
+    setPending(new Set(pendingRef.current));
+    return true;
+  };
+  const unlockRow = (name: string) => {
+    pendingRef.current.delete(name);
+    setPending(new Set(pendingRef.current));
+  };
 
   if (authLoading) {
     return <Loading />;
@@ -57,39 +65,46 @@ const GroupScores = ({ groupName }: { groupName: string }) => {
   if (!canView) notFound();
 
   const handleScoreChange = async (name: string, newScore: number) => {
-    const safeScore = Math.max(0, newScore);
-    const { error } = await updateScore(name, safeScore);
-
-    if (error) {
-      toast.error(getFriendlyErrorMessage(error, t), { duration: 5000 });
-      return;
+    if (!Number.isInteger(newScore) || newScore < 0 || newScore > 2147483647) {
+      toast.error(t("polish.invalidScore"));
+      return false;
     }
-
-    setStudents((prev) =>
-      prev.map((student) =>
-        student.name === name ? { ...student, score: safeScore } : student
-      )
-    );
+    if (!lockRow(name)) return false;
+    try {
+      const { error } = await updateScore(name, groupName, newScore);
+      if (error) throw error;
+      setStudents((prev) =>
+        prev.map((student) =>
+          student.name === name ? { ...student, score: newScore } : student,
+        ),
+      );
+      return true;
+    } catch {
+      toast.error(t("errors.generic"));
+      return false;
+    } finally {
+      unlockRow(name);
+    }
   };
-
   const handleDelete = async (name: string) => {
     if (
+      pendingRef.current.has(name) ||
       !window.confirm(
-        t("groupScores.removeConfirm").replace("{name}", capitalize(name))
+        t("groupScores.removeConfirm").replace("{name}", capitalize(name)),
       )
-    ) {
+    )
       return;
+    if (!lockRow(name)) return;
+    try {
+      const { error } = await deleteScore(name, groupName);
+      if (error) throw error;
+      setStudents((prev) => prev.filter((student) => student.name !== name));
+      toast.success(t("groupScores.removedToast"));
+    } catch {
+      toast.error(t("errors.generic"));
+    } finally {
+      unlockRow(name);
     }
-
-    const { error } = await deleteScore(name);
-
-    if (error) {
-      toast.error(getFriendlyErrorMessage(error, t), { duration: 5000 });
-      return;
-    }
-
-    toast.success(t("groupScores.removedToast"), { duration: 5000 });
-    setStudents((prev) => prev.filter((student) => student.name !== name));
   };
 
   const startEditing = (student: ScoreData) => {
@@ -98,12 +113,9 @@ const GroupScores = ({ groupName }: { groupName: string }) => {
   };
 
   const commitEditing = async () => {
-    if (editingName === null) return;
-    const parsed = parseInt(editingValue, 10);
-    if (!isNaN(parsed)) {
-      await handleScoreChange(editingName, parsed);
-    }
-    setEditingName(null);
+    if (editingName === null || pendingRef.current.has(editingName)) return;
+    const parsed = editingValue.trim() === "" ? NaN : Number(editingValue);
+    if (await handleScoreChange(editingName, parsed)) setEditingName(null);
   };
 
   if (loading) {
@@ -119,24 +131,41 @@ const GroupScores = ({ groupName }: { groupName: string }) => {
       <h1 className="text-3xl font-bold mb-6 text-center">
         {capitalize(groupName)} {t("groupScores.scoresSuffix")}
       </h1>
-      {students.length === 0 ? (
-        <p className="text-center text-gray-500 mb-8">{t("groupScores.none")}</p>
+      {failed ? (
+        <LoadError retry={reload} />
+      ) : students.length === 0 ? (
+        <p className="text-center text-gray-500 mb-8">
+          {t("groupScores.none")}
+        </p>
       ) : (
         <div className="flex flex-col gap-3 max-w-2xl mx-auto mb-8">
           {students.map((student) => (
             <div
               key={student.name}
-              className="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4"
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4"
             >
               <span className="font-semibold truncate">
                 {capitalize(student.name)}
               </span>
-              <div className="flex items-center gap-3 shrink-0">
+              <div
+                className="flex items-center flex-wrap gap-2 shrink-0"
+                aria-busy={pending.has(student.name)}
+              >
                 <button
                   type="button"
                   className="btn light-btn border border-gray-200 p-2"
-                  onClick={() => handleScoreChange(student.name, student.score - 1)}
-                  aria-label={`Decrease score for ${student.name}`}
+                  onClick={() =>
+                    handleScoreChange(student.name, student.score - 1)
+                  }
+                  disabled={
+                    pending.has(student.name) ||
+                    editingName === student.name ||
+                    student.score === 0
+                  }
+                  aria-label={t("polish.decrease").replace(
+                    "{name}",
+                    capitalize(student.name),
+                  )}
                 >
                   <Minus className="size-4" />
                 </button>
@@ -144,12 +173,22 @@ const GroupScores = ({ groupName }: { groupName: string }) => {
                   <input
                     type="number"
                     className="input w-20 text-center"
+                    min={0}
+                    max={2147483647}
+                    step={1}
+                    disabled={pending.has(student.name)}
+                    aria-label={t("polish.editScore").replace(
+                      "{name}",
+                      capitalize(student.name),
+                    )}
                     value={editingValue}
                     autoFocus
                     onChange={(e) => setEditingValue(e.target.value)}
-                    onBlur={commitEditing}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") commitEditing();
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        void commitEditing();
+                      }
                       if (e.key === "Escape") setEditingName(null);
                     }}
                   />
@@ -157,6 +196,11 @@ const GroupScores = ({ groupName }: { groupName: string }) => {
                   <button
                     type="button"
                     className="font-bold text-primary text-lg w-12 text-center cursor-pointer"
+                    disabled={pending.has(student.name)}
+                    aria-label={t("polish.editScore").replace(
+                      "{name}",
+                      capitalize(student.name),
+                    )}
                     onClick={() => startEditing(student)}
                   >
                     {student.score}
@@ -165,17 +209,57 @@ const GroupScores = ({ groupName }: { groupName: string }) => {
                 <button
                   type="button"
                   className="btn light-btn border border-gray-200 p-2"
-                  onClick={() => handleScoreChange(student.name, student.score + 1)}
-                  aria-label={`Increase score for ${student.name}`}
+                  onClick={() =>
+                    handleScoreChange(student.name, student.score + 1)
+                  }
+                  disabled={
+                    pending.has(student.name) ||
+                    editingName === student.name ||
+                    student.score === 2147483647
+                  }
+                  aria-label={t("polish.increase").replace(
+                    "{name}",
+                    capitalize(student.name),
+                  )}
                 >
                   <Plus className="size-4" />
                 </button>
-                {canManageStudents && (
+                {editingName === student.name && (
+                  <>
+                    <button
+                      type="button"
+                      className="btn dark-btn text-sm"
+                      disabled={pending.has(student.name)}
+                      onClick={commitEditing}
+                    >
+                      {t(
+                        pending.has(student.name)
+                          ? "polish.saving"
+                          : "polish.save",
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn text-sm"
+                      disabled={pending.has(student.name)}
+                      onClick={() => setEditingName(null)}
+                    >
+                      {t("polish.cancel")}
+                    </button>
+                  </>
+                )}
+                {canManageStudents && !failed && (
                   <button
                     type="button"
                     className="text-red-500 p-2 cursor-pointer"
                     onClick={() => handleDelete(student.name)}
-                    aria-label={`Remove ${student.name}`}
+                    disabled={
+                      pending.has(student.name) || editingName === student.name
+                    }
+                    aria-label={t("polish.remove").replace(
+                      "{name}",
+                      capitalize(student.name),
+                    )}
                   >
                     <Trash2 className="size-4" />
                   </button>
@@ -185,7 +269,7 @@ const GroupScores = ({ groupName }: { groupName: string }) => {
           ))}
         </div>
       )}
-      {canManageStudents && (
+      {canManageStudents && !failed && (
         <button
           type="button"
           className="btn dark-btn block mx-auto"

@@ -1,4 +1,43 @@
 const en = {
+  polish: {
+    loadError: "We couldn’t load this information. Please try again.",
+    retry: "Try again",
+    searchFor: "for “{query}”",
+    clearSearch: "Clear search",
+    save: "Save",
+    cancel: "Cancel",
+    saving: "Saving…",
+    invalidScore: "Enter a whole number between 0 and 2,147,483,647.",
+    increase: "Increase score for {name}",
+    decrease: "Decrease score for {name}",
+    editScore: "Edit score for {name}",
+    remove: "Remove {name}",
+    quickAccess: "Your workspace",
+    workspaceIntro: "Your groups, students, and teaching tools in one place.",
+    manageGroups: "Manage groups & scores",
+    studentsDesc: "Find students and their teaching groups.",
+    groupsDesc: "Open a group to manage its score list.",
+    registerDesc: "Register a new student.",
+    staffDesc: "Register an admin, teacher, or assistant.",
+    lessonsDesc: "See your group members and lessons.",
+    scoresDesc: "View the leaderboard.",
+    noGroup: "No group assigned",
+    noLessons: "No lessons assigned yet.",
+    noMembers: "No group members yet.",
+    openMenu: "Open navigation",
+    closeMenu: "Close navigation",
+    profile: "Your dashboard",
+    correctErrors: "Please correct the errors and try again.",
+    invitationSent: "Sign-in link sent. The new user must verify their email.",
+    contactUnavailable:
+      "Contact delivery is not configured yet. Please contact the school directly.",
+    contactNote: "Send your question to the Alrifai team.",
+    contactAction: "Open email enquiry",
+    contactMailNote:
+      "This opens your email app with your message. Send it there to complete your enquiry.",
+    contactSubject: "Alrifai enquiry",
+    messageLabel: "Your message",
+  },
   common: {
     signIn: "Sign in",
     menu: "Menu",
@@ -24,7 +63,7 @@ const en = {
   home: {
     heroTitle: "Connect with your child's education like never before",
     heroSubtitle:
-      "Alrifai is a platform that allows you to keep up with your child's lessons, assignments, and progress..",
+      "Alrifai is a platform that allows you to keep up with your child's lessons, assignments, and progress.",
     dashboard: "Dashboard",
     getStarted: "Get Started with Alrifai",
     provideTitle: "What do we provide?",
@@ -180,7 +219,8 @@ const en = {
     minLength: "{field} must be at least {min} characters",
     fullnameLetters: "Full name can only contain letters and spaces",
     emailInvalid: "Please enter a valid email address",
-    usernameChars: "Username can only contain letters, numbers, and underscores",
+    usernameChars:
+      "Username can only contain letters, numbers, and underscores",
     usernameTaken: "Username is already taken",
     ageMin: "You must be at least {min} years old",
     dateFuture: "Date cannot be in the future",
@@ -201,7 +241,8 @@ const en = {
     rateLimitExceeded: "Too many attempts. Please wait a moment and try again.",
     signupsDisabled:
       "Sign-ups are currently disabled. Please contact support or try again later.",
-    groupNameTaken: "Group name already exists. Please choose a different group name.",
+    groupNameTaken:
+      "Group name already exists. Please choose a different group name.",
     generic: "Something went wrong. Please try again.",
   },
   installPrompt: {

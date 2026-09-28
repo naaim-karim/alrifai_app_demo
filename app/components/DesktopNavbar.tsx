@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CircleChevronDown, CircleUser } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import Loading from "./Loading";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { getProfileRole } from "@/lib/utils";
@@ -14,14 +15,37 @@ const DesktopNavbar = () => {
   const { user, loading } = useAuth();
   const { t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isRotated, setIsRotated] = useState(false);
+  const menuRef = useRef<HTMLLIElement>(null);
+  const pathname = usePathname();
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const closeOutside = (event: PointerEvent) => {
+      if (!menuRef.current?.contains(event.target as Node))
+        setIsMenuOpen(false);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsMenuOpen(false);
+        menuRef.current?.querySelector("button")?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [isMenuOpen]);
 
   if (loading) {
     return <Loading />;
   }
 
   return (
-    <nav className="main-container py-4 justify-between items-center relative hidden md:flex">
+    <nav className="desktop-nav main-container py-4 justify-between items-center relative hidden md:flex">
       <Link href="/" className="text-primary font-bold text-2xl">
         Alrifai
       </Link>
@@ -36,53 +60,61 @@ const DesktopNavbar = () => {
           <li>
             <Link href="/scores">{t("nav.scores")}</Link>
           </li>
-          {user && (
-            <li>
-              <Link
-                href={
-                  user.user_metadata.role === "admin" ||
+          {user &&
+            (["admin", "teacher_assistant"].includes(user.user_metadata.role) ||
+              user.user_metadata.group) && (
+              <li>
+                <Link
+                  href={
+                    user.user_metadata.role === "admin" ||
+                    user.user_metadata.role === "teacher_assistant"
+                      ? `/groups`
+                      : `/group/${encodeURIComponent(user.user_metadata.group || "")}`
+                  }
+                >
+                  {user.user_metadata.role === "admin" ||
                   user.user_metadata.role === "teacher_assistant"
-                    ? `/groups`
-                    : `/group/${user.user_metadata.group}`
-                }
-              >
-                {user.user_metadata.role === "admin" ||
-                user.user_metadata.role === "teacher_assistant"
-                  ? t("nav.groups")
-                  : t("nav.group")}
-              </Link>
-            </li>
-          )}
+                    ? t("nav.groups")
+                    : t("nav.group")}
+                </Link>
+              </li>
+            )}
           {user && user.user_metadata.role === "admin" && (
             <li>
               <Link href={`/students`}>{t("nav.students")}</Link>
             </li>
           )}
-          {user && user.user_metadata.role === "teacher" && (
-            <li>
-              <Link href={`/scores/manage/${user.user_metadata.group}`}>
-                {t("nav.editScores")}
-              </Link>
-            </li>
-          )}
+          {user &&
+            user.user_metadata.role === "teacher" &&
+            user.user_metadata.group && (
+              <li>
+                <Link
+                  href={`/scores/manage/${encodeURIComponent(user.user_metadata.group || "")}`}
+                >
+                  {t("nav.editScores")}
+                </Link>
+              </li>
+            )}
           {user && user.user_metadata.role === "admin" && (
-            <li
-              className="mega-menu"
-              onClick={() => {
-                setIsMenuOpen(!isMenuOpen);
-                setIsRotated(!isRotated);
-              }}
-            >
-              <button className="flex items-center gap-1 cursor-pointer">
+            <li ref={menuRef} className="mega-menu">
+              <button
+                type="button"
+                aria-expanded={isMenuOpen}
+                aria-controls="mega-menu"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="flex items-center gap-1 cursor-pointer"
+              >
                 <CircleChevronDown
                   className={`text-black size-5 transition-all duration-300 ${
-                    isRotated ? "arrow-rotated" : ""
+                    isMenuOpen ? "arrow-rotated" : ""
                   }`}
                 />
                 {t("nav.addNew")}
               </button>
               <ul
                 id="mega-menu"
+                inert={!isMenuOpen}
+                onClick={() => setIsMenuOpen(false)}
                 className={`absolute end-20 flex flex-col bg-white rounded-b-xl border border-gray-200 p-3 gap-3 transition-all duration-300 ease-in-out ${
                   isMenuOpen ? "mega-menu-opened" : "mega-menu-closed"
                 }`}
@@ -110,7 +142,7 @@ const DesktopNavbar = () => {
             href={`/u/${getProfileRole(user.user_metadata.role)}/${
               user.user_metadata.username
             }`}
-            className=""
+            aria-label={t("polish.profile")}
           >
             {user.user_metadata.profileImageUrl ? (
               <Image
@@ -121,7 +153,7 @@ const DesktopNavbar = () => {
                 className="w-10 h-10 object-cover rounded-full"
               />
             ) : (
-              <CircleUser className="size-6 btn dark-btn" />
+              <CircleUser className="size-9 text-primary" />
             )}
           </Link>
         ) : (

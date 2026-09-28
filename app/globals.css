@@ -88,3 +88,116 @@ body {
     transform: translateX(0);
   }
 }
+
+/* Alrifai finishing pass: retain the existing teal identity. */
+@layer components {
+  .main-container {
+    max-width: 1200px;
+  }
+  .btn {
+    transition:
+      background-color 0.15s,
+      box-shadow 0.15s;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dark-btn:hover:not(:disabled) {
+    background-color: #334b48;
+  }
+  .input {
+    min-height: 44px;
+  }
+  .state-panel {
+    border: 1px solid #dde4e1;
+    border-radius: 16px;
+    padding: 28px;
+    background: white;
+    text-align: center;
+    color: #435d5a;
+  }
+  .workspace-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 24px;
+    background: white;
+    border: 1px solid #dde4e1;
+    border-radius: 16px;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+  }
+  .workspace-card:hover {
+    border-color: #435d5a;
+    box-shadow: 0 6px 18px #435d5a0a;
+  }
+  .group-card {
+    border: 1px solid #dde4e1;
+    border-radius: 16px;
+    padding: 20px;
+    background: white;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+  }
+  .group-card:hover {
+    border-color: #435d5a;
+    box-shadow: 0 6px 18px #435d5a0a;
+  }
+}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid #435d5a;
+  outline-offset: 4px;
+}
+.app-modal {
+  width: min(448px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  border: 1px solid #dde4e1;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 24px 80px #152b2933;
+}
+.app-modal::backdrop {
+  background: #142c2966;
+  backdrop-filter: blur(3px);
+}
+.mobile-nav {
+  overflow-y: auto;
+  width: min(340px, 85vw);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.app-modal.nav-modal {
+  height: 100dvh;
+  max-height: 100dvh;
+  width: min(340px, 85vw);
+  margin-block: 0;
+  margin-inline-start: 0;
+  margin-inline-end: auto;
+  border-radius: 0;
+  padding: 24px;
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .desktop-nav > div,
+  .desktop-nav > div > ul {
+    gap: 12px;
+  }
+  .desktop-nav {
+    font-size: 13px;
+  }
+}

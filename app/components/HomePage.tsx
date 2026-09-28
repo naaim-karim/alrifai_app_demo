@@ -45,8 +45,8 @@ const HomePage = () => {
     <main className="flex-grow-1">
       {/* Hero Section */}
       <section className="bg-primary">
-        <div className="main-container min-h-[47rem] flex justify-center lg:justify-between items-center">
-          <div className="flex flex-col items-start gap-10 text-center lg:text-start lg:max-w-xl">
+        <div className="main-container min-h-[34rem] py-12 md:py-16 gap-10 flex justify-center lg:justify-between items-center">
+          <div className="flex flex-col items-start gap-10 text-center lg:text-start lg:max-w-xl w-full">
             <h1 className="text-4xl/snug font-bold text-white sm:text-5xl/snug md:text-6xl/snug">
               {t("home.heroTitle")}
             </h1>
@@ -69,13 +69,13 @@ const HomePage = () => {
               </Link>
             )}
           </div>
-          <div className="hidden lg:block">
+          <div className="hidden lg:block shrink-0">
             <Image
               src="/quran_boy.png"
               alt="Quran Boy"
               width={1024}
               height={1536}
-              className="w-md h-auto"
+              className="w-full max-w-80 h-auto"
             />
           </div>
         </div>
@@ -106,7 +106,9 @@ const HomePage = () => {
                 height={512}
                 className="w-28 h-auto"
               />
-              <h3 className="text-xl font-bold mt-5">{t("home.arabicTitle")}</h3>
+              <h3 className="text-xl font-bold mt-5">
+                {t("home.arabicTitle")}
+              </h3>
               <p className="text-center">{t("home.arabicDesc")}</p>
             </div>
             <div className="flex flex-col items-center">

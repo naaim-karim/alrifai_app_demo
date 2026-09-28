@@ -19,7 +19,7 @@ export const fetchGroups = async (): Promise<GroupData[]> => {
 };
 
 export const fetchGroupMembers = async (
-  groupName: string
+  groupName: string,
 ): Promise<string[]> => {
   const { data, error } = await supabase
     .from("student_profiles")
@@ -27,7 +27,7 @@ export const fetchGroupMembers = async (
     .eq("group", groupName);
 
   if (error) {
-    return [error.message];
+    throw error;
   }
 
   return data.map((member) => member.fullname);

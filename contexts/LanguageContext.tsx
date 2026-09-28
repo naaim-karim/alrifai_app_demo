@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 import { getTranslator, type Locale } from "@/locales";
 
 type LanguageContextType = {
@@ -14,7 +14,8 @@ const LanguageContext = createContext<LanguageContextType | null>(null);
 
 const LOCALE_COOKIE = "locale";
 
-const getDir = (locale: Locale): "ltr" | "rtl" => (locale === "ar" ? "rtl" : "ltr");
+const getDir = (locale: Locale): "ltr" | "rtl" =>
+  locale === "ar" ? "rtl" : "ltr";
 
 export const LanguageProvider = ({
   initialLocale,
@@ -29,7 +30,7 @@ export const LanguageProvider = ({
     document.documentElement.dir = getDir(next);
   };
 
-  const t = getTranslator(locale);
+  const t = useMemo(() => getTranslator(locale), [locale]);
 
   const value = { locale, dir: getDir(locale), t, setLocale };
   return (

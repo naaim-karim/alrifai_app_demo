@@ -7,9 +7,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { signUpNewStudentAction } from "@/app/new-user/student/action";
 import { signUpNewAdminAction } from "@/app/new-user/admin/action";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const useSignUpMagicLink = (resetForm: () => void) => {
   const { signUpWithMagicLink } = useAuth();
+  const { t } = useLanguage();
   const [showSuccess, setShowSuccess] = useState(false);
   const pathname = usePathname();
   const isAdmin = pathname.includes("admin");
@@ -31,12 +33,13 @@ export const useSignUpMagicLink = (resetForm: () => void) => {
               result?.errors?.joinedOn ||
               result?.errors?.group ||
               result?.errors?.profileImage ||
-              "Please correct the errors and try again"
+              result?.errors?.role ||
+              t("polish.correctErrors"),
           );
         }
 
         const { error: magicLinkError } = await signUpWithMagicLink(
-          result.data
+          result.data,
         );
 
         if (magicLinkError) {
@@ -46,21 +49,21 @@ export const useSignUpMagicLink = (resetForm: () => void) => {
         setShowSuccess(true);
         return null;
       } catch {
-        return new Error("An unexpected error occurred. Please try again.");
+        return new Error(t("auth.unexpectedError"));
       }
     },
-    null
+    null,
   );
 
   useEffect(() => {
     if (showSuccess) {
-      toast.success("User created successfully!", {
+      toast.success(t("polish.invitationSent"), {
         duration: 5000,
       });
       resetForm();
       setShowSuccess(false);
     }
-  }, [showSuccess, resetForm]);
+  }, [showSuccess, resetForm, t]);
 
   return { error, submitAction, isPending };
 };

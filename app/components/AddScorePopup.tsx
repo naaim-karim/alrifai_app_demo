@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import Modal from "./Modal";
+import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 import { getFieldValidators, getValidations } from "@/lib/validations";
 import { insertScore } from "@/services/scoresService";
@@ -36,10 +37,7 @@ const AddScorePopup = ({
       return;
     }
 
-    const combinedName = `${firstName.replace(/\s+/g, "")} ${lastName.replace(
-      /\s+/g,
-      ""
-    )}`;
+    const combinedName = `${firstName.trim().replace(/\s+/g, " ")} ${lastName.trim().replace(/\s+/g, " ")}`;
 
     const error = await getFieldValidators(t).scoreName(combinedName);
     if (error) {
@@ -73,35 +71,23 @@ const AddScorePopup = ({
       e.preventDefault();
       handleAddStudent();
     },
-    [handleAddStudent]
+    [handleAddStudent],
   );
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        if (isSubmitting) return;
-        event.preventDefault();
-        setShowAddPopup(false);
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [setShowAddPopup, isSubmitting]);
-
   return (
-    <div className="fixed inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-xl"
-      >
-        <h2 className="text-xl font-bold mb-4">{t("addScorePopup.title")}</h2>
+    <Modal
+      titleId="add-student-title"
+      onClose={() => setShowAddPopup(false)}
+      busy={isSubmitting}
+    >
+      <form onSubmit={handleSubmit} className="bg-white p-6 w-full">
+        <h2 id="add-student-title" className="text-xl font-bold mb-4">
+          {t("addScorePopup.title")}
+        </h2>
         <div className="space-y-4">
           <input
             type="text"
+            aria-label={t("formFields.firstName")}
             placeholder={t("formFields.firstName")}
             className="input w-full"
             value={firstName}
@@ -112,6 +98,7 @@ const AddScorePopup = ({
           />
           <input
             type="text"
+            aria-label={t("formFields.lastName")}
             placeholder={t("formFields.lastName")}
             className="input w-full"
             value={lastName}
@@ -129,12 +116,16 @@ const AddScorePopup = ({
           >
             {t("addScorePopup.cancel")}
           </button>
-          <button type="submit" className="btn dark-btn" disabled={isSubmitting}>
+          <button
+            type="submit"
+            className="btn dark-btn"
+            disabled={isSubmitting}
+          >
             {t("addScorePopup.add")}
           </button>
         </div>
       </form>
-    </div>
+    </Modal>
   );
 };
 

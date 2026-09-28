@@ -6,7 +6,7 @@ import { getFieldValidators, validateFormData } from "@/lib/validations";
 import { SignUpUserData, SignUpResult } from "@/types";
 
 export const signUpNewAdminAction = async (
-  formData: FormData
+  formData: FormData,
 ): Promise<SignUpResult> => {
   const locale = ((await cookies()).get("locale")?.value as Locale) || "en";
   const fieldValidators = getFieldValidators(getTranslator(locale));
@@ -16,14 +16,14 @@ export const signUpNewAdminAction = async (
 
   const { isValid: isNameValid, errors: nameErrors } = await validateFormData(
     { firstName, lastName },
-    { firstName: fieldValidators.firstName, lastName: fieldValidators.lastName }
+    {
+      firstName: fieldValidators.firstName,
+      lastName: fieldValidators.lastName,
+    },
   );
 
   const data: SignUpUserData = {
-    fullname: `${firstName.replace(/\s+/g, "")} ${lastName.replace(
-      /\s+/g,
-      ""
-    )}`,
+    fullname: `${firstName.trim().replace(/\s+/g, " ")} ${lastName.trim().replace(/\s+/g, " ")}`,
     username: formData.get("username")?.toString() || "",
     email: formData.get("email")?.toString() || "",
     joinedOn: formData.get("joinedOn")?.toString() || "",
@@ -38,6 +38,7 @@ export const signUpNewAdminAction = async (
     joinedOn: fieldValidators.joinedOn,
     profileImage: fieldValidators.profileImage,
     role: fieldValidators.role,
+    ...(data.role === "teacher" ? { group: fieldValidators.group } : {}),
   });
 
   if (!isNameValid || !isValid) {

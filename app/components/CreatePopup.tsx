@@ -1,14 +1,17 @@
+import Modal from "./Modal";
 import supabase from "@/lib/supabaseClient";
 import { getFriendlyErrorMessage } from "@/lib/utils";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 import { getValidations } from "@/lib/validations";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const CreatePopup = ({
   setShowCreatePopup,
+  onCreated,
 }: {
   setShowCreatePopup: (value: boolean) => void;
+  onCreated: () => void;
 }) => {
   const { t } = useLanguage();
   const [groupName, setGroupName] = useState("");
@@ -27,19 +30,19 @@ const CreatePopup = ({
       return;
     }
     try {
-      const { data: nextId, error: idError } = await supabase.rpc(
-        "get_next_groups_id"
-      );
+      const { data: nextId, error: idError } =
+        await supabase.rpc("get_next_groups_id");
 
-      if (idError) {
+      if (idError || nextId == null) {
         toast.error(t("createPopup.idError"), {
           duration: 5000,
         });
+        return;
       }
 
       const { error } = await supabase.from("groups").insert({
         id: nextId,
-        group_name: groupName.toLowerCase(),
+        group_name: groupName.trim().toLowerCase(),
         closed: closed,
       });
 
@@ -51,6 +54,7 @@ const CreatePopup = ({
         toast.success(t("createPopup.successToast"), {
           duration: 5000,
         });
+        onCreated();
         setShowCreatePopup(false);
       }
     } catch {
@@ -60,43 +64,30 @@ const CreatePopup = ({
     } finally {
       setIsSubmitting(false);
     }
-  }, [groupName, closed, setShowCreatePopup, t]);
+  }, [groupName, closed, setShowCreatePopup, onCreated, t]);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
-      console.log("I'm running");
       e.preventDefault();
       handleCreateGroup();
     },
-    [handleCreateGroup]
+    [handleCreateGroup],
   );
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        if (isSubmitting) return;
-        event.preventDefault();
-        setShowCreatePopup(false);
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [setShowCreatePopup, isSubmitting]);
-
   return (
-    <div className="fixed inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-xl"
-      >
-        <h2 className="text-xl font-bold mb-4">{t("createPopup.title")}</h2>
+    <Modal
+      titleId="create-group-title"
+      onClose={() => setShowCreatePopup(false)}
+      busy={isSubmitting}
+    >
+      <form onSubmit={handleSubmit} className="bg-white p-6 w-full">
+        <h2 id="create-group-title" className="text-xl font-bold mb-4">
+          {t("createPopup.title")}
+        </h2>
         <div className="space-y-4">
           <input
             type="text"
+            aria-label={t("createPopup.groupNamePlaceholder")}
             placeholder={t("createPopup.groupNamePlaceholder")}
             className="input w-full"
             value={groupName}
@@ -150,7 +141,7 @@ const CreatePopup = ({
           </button>
         </div>
       </form>
-    </div>
+    </Modal>
   );
 };
 

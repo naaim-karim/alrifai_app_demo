@@ -15,10 +15,13 @@ import { notFound, redirect, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Loading from "./Loading";
+import LoadError from "./LoadError";
 
 const SignUpForm = () => {
   const [signUpFormConfig, setSignUpFormConfig] = useState<FormField[]>([]);
   const [loading, setLoading] = useState(true);
+  const [configFailed, setConfigFailed] = useState(false);
+  const [retry, setRetry] = useState(0);
   const [serverError, setServerError] = useState<string | null>(null);
   const pathname = usePathname();
   const { user, loading: authLoading } = useAuth();
@@ -37,20 +40,21 @@ const SignUpForm = () => {
 
   useEffect(() => {
     const loadFormConfig = async () => {
+      setConfigFailed(false);
       try {
         const signUpFormConfig = pathname.includes("admin")
           ? await getAdminSignUpFormConfig(t, values.role as string | undefined)
           : await getStudentSignUpFormConfig(t);
         setSignUpFormConfig(signUpFormConfig);
       } catch {
-        setSignUpFormConfig([]);
+        setConfigFailed(true);
       } finally {
         setLoading(false);
       }
     };
 
     loadFormConfig();
-  }, [pathname, values.role, t]);
+  }, [pathname, values.role, t, retry]);
   const { error, submitAction, isPending } = useSignUpMagicLink(resetForm);
   useEffect(() => {
     if (error) {
@@ -61,7 +65,7 @@ const SignUpForm = () => {
   const handleSubmit = async (formData: FormData) => {
     clearErrors();
 
-    const isValid = validateAllFields();
+    const isValid = await validateAllFields();
 
     if (!isValid) return;
 
@@ -88,76 +92,80 @@ const SignUpForm = () => {
           ? t("signup.titleAdmin")
           : t("signup.titleStudent")}
       </h1>
-      <Form
-        action={handleSubmit}
-        className="flex flex-col mx-auto max-w-md relative"
-        formMethod="post"
-        aria-label="Sign Up Form"
-        aria-describedby="form-description"
-      >
-        <p className="sr-only" id="form-description">
-          {t("signup.formDescription")}
-        </p>
-
-        {signUpFormConfig.map((field) =>
-          field.type === "file" ? (
-            <ImageUploadInput
-              key={field.name}
-              name={field.name}
-              label={field.label}
-              id={field.id}
-              value={values[field.name] as File | null}
-              error={errors[field.name]}
-              disabled={isPending}
-              onChange={(file) => handleFieldChange(field, file)}
-              onBlur={() => handleFieldBlur(field)}
-              elementRef={refs[field.name]}
-            />
-          ) : (
-            <FormInput
-              key={field.name}
-              field={field}
-              value={(values[field.name] as string) || ""}
-              error={errors[field.name]}
-              disabled={isPending}
-              onChange={(value) => handleFieldChange(field, value)}
-              onBlur={() => handleFieldBlur(field)}
-              elementRef={refs[field.name]}
-            />
-          )
-        )}
-        <button
-          type="reset"
-          className="btn bg-gray-200 text-primary flex justify-center items-center"
-          disabled={isPending}
-          onClick={() => {
-            resetForm();
-            setServerError(null);
-          }}
+      {configFailed ? (
+        <LoadError retry={() => setRetry((n) => n + 1)} />
+      ) : (
+        <Form
+          action={handleSubmit}
+          className="flex flex-col mx-auto max-w-md relative"
+          formMethod="post"
+          aria-label="Sign Up Form"
+          aria-describedby="form-description"
         >
-          {t("signup.resetForm")}
-          <CookingPot className="ms-2 size-5" />
-        </button>
-
-        {serverError && (
-          <p
-            id="signup-error"
-            className="text-red-500 text-sm p-1 text-center"
-            role="alert"
-          >
-            {serverError || t("signup.errorFallback")}
+          <p className="sr-only" id="form-description">
+            {t("signup.formDescription")}
           </p>
-        )}
-        <button
-          type="submit"
-          className="btn dark-btn mt-2 flex justify-center items-center"
-          disabled={isPending}
-          aria-busy={isPending}
-        >
-          {isPending ? t("signup.signingUp") : t("signup.signUp")}
-          <Send className="ms-2 size-5" />
-        </button>
-      </Form>
+
+          {signUpFormConfig.map((field) =>
+            field.type === "file" ? (
+              <ImageUploadInput
+                key={field.name}
+                name={field.name}
+                label={field.label}
+                id={field.id}
+                value={values[field.name] as File | null}
+                error={errors[field.name]}
+                disabled={isPending}
+                onChange={(file) => handleFieldChange(field, file)}
+                onBlur={() => handleFieldBlur(field)}
+                elementRef={refs[field.name]}
+              />
+            ) : (
+              <FormInput
+                key={field.name}
+                field={field}
+                value={(values[field.name] as string) || ""}
+                error={errors[field.name]}
+                disabled={isPending}
+                onChange={(value) => handleFieldChange(field, value)}
+                onBlur={() => handleFieldBlur(field)}
+                elementRef={refs[field.name]}
+              />
+            ),
+          )}
+          <button
+            type="reset"
+            className="btn bg-gray-200 text-primary flex justify-center items-center"
+            disabled={isPending}
+            onClick={() => {
+              resetForm();
+              setServerError(null);
+            }}
+          >
+            {t("signup.resetForm")}
+            <CookingPot className="ms-2 size-5" />
+          </button>
+
+          {serverError && (
+            <p
+              id="signup-error"
+              className="text-red-500 text-sm p-1 text-center"
+              role="alert"
+            >
+              {serverError || t("signup.errorFallback")}
+            </p>
+          )}
+          <button
+            type="submit"
+            className="btn dark-btn mt-2 flex justify-center items-center"
+            disabled={isPending}
+            aria-busy={isPending}
+          >
+            {isPending ? t("signup.signingUp") : t("signup.signUp")}
+            <Send className="ms-2 size-5" />
+          </button>
+        </Form>
+      )}
       <p className="text-gray-500 text-center mt-4">
         {t("signup.troubleSigningIn")}
         <Link href="/contact" className="text-primary font-semibold">

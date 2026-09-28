@@ -15,7 +15,7 @@ export const fetchAllScores = async (): Promise<ScoreData[]> => {
 };
 
 export const fetchGroupScores = async (
-  groupName: string
+  groupName: string,
 ): Promise<ScoreData[]> => {
   const { data, error } = await supabase
     .from("student_scores")
@@ -46,13 +46,25 @@ export const insertScore = async (name: string, group: string) => {
     .insert({ name: name.toLowerCase(), score: 0, group });
 };
 
-export const updateScore = async (name: string, score: number) => {
+export const updateScore = async (
+  name: string,
+  group: string,
+  score: number,
+) => {
+  if (!Number.isInteger(score) || score < 0 || score > 2147483647) {
+    return { error: new Error("Invalid score") };
+  }
   return await supabase
     .from("student_scores")
     .update({ score })
-    .eq("name", name);
+    .eq("name", name)
+    .eq("group", group);
 };
 
-export const deleteScore = async (name: string) => {
-  return await supabase.from("student_scores").delete().eq("name", name);
+export const deleteScore = async (name: string, group: string) => {
+  return await supabase
+    .from("student_scores")
+    .delete()
+    .eq("name", name)
+    .eq("group", group);
 };

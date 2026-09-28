@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { capitalize } from "@/lib/utils";
-import { ScoreData } from "@/types";
 import { fetchAllScores } from "@/services/scoresService";
 import supabase from "@/lib/supabaseClient";
+import { useAsyncList } from "@/app/hooks/useAsyncList";
+import LoadError from "./LoadError";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const rankStyles: Record<number, string> = {
@@ -20,22 +21,14 @@ const rankMedals: Record<number, string> = {
 };
 
 const Scores = () => {
-  const [scores, setScores] = useState<ScoreData[]>([]);
-  const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
 
-  useEffect(() => {
-    const loadScores = async () => {
-      try {
-        const data = await fetchAllScores();
-        setScores(data.filter((score) => !score.error));
-      } catch {
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadScores();
-  }, []);
+  const {
+    data: scores,
+    loading,
+    failed,
+    reload,
+  } = useAsyncList(fetchAllScores, true);
 
   useEffect(() => {
     const channel = supabase
@@ -44,17 +37,15 @@ const Scores = () => {
         "postgres_changes",
         { event: "*", schema: "public", table: "student_scores" },
         () => {
-          fetchAllScores().then((data) =>
-            setScores(data.filter((score) => !score.error))
-          );
-        }
+          void reload();
+        },
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [reload]);
 
   if (loading) {
     return (
@@ -72,7 +63,9 @@ const Scores = () => {
       <h1 className="text-3xl font-bold mb-6 text-center">
         {t("scores.leaderboard")}
       </h1>
-      {scores.length === 0 ? (
+      {failed ? (
+        <LoadError retry={reload} />
+      ) : scores.length === 0 ? (
         <p className="text-center text-gray-500">{t("scores.none")}</p>
       ) : (
         <div className="flex flex-col gap-3 max-w-2xl mx-auto">
@@ -91,7 +84,7 @@ const Scores = () => {
                   {capitalize(student.name)}
                 </span>
               </div>
-              <div className="flex items-center gap-6 shrink-0">
+              <div className="flex items-end sm:items-center flex-col sm:flex-row gap-1 sm:gap-6 shrink-0">
                 <span className="text-sm text-secondary">
                   {capitalize(student.group)}
                 </span>

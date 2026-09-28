@@ -49,7 +49,7 @@ const SignInForm = () => {
   const handleSubmit = async (formData: FormData) => {
     clearErrors();
 
-    const isValid = validateAllFields();
+    const isValid = await validateAllFields();
 
     if (!isValid) return;
 
